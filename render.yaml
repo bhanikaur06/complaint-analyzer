@@ -1,0 +1,22 @@
+# Render deployment blueprint. Render reads this file automatically.
+services:
+  - type: web
+    name: complaint-analyzer
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-deploy.txt
+    startCommand: python src/app.py
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      # Where accounts are kept. /tmp is writable but temporary on the free plan.
+      - key: DATA_DIR
+        value: /tmp/complaint-analyzer
+      # A demo login that is recreated every time the app starts, so it always works
+      # even though other accounts are wiped. Render asks you for these two values when
+      # you create the blueprint, so the password is never written in the repository.
+      - key: DEMO_EMAIL
+        sync: false
+      - key: DEMO_PASSWORD
+        sync: false

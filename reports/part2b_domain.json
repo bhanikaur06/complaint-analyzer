@@ -1,0 +1,47 @@
+{
+  "source_only_on_source": {
+    "setting": "source test",
+    "macro_f1": 0.5822036976276316,
+    "accuracy": 0.6451027811366384
+  },
+  "source_only_on_target": {
+    "setting": "complaint set",
+    "macro_f1": 0.2833084134557769,
+    "accuracy": 0.3076923076923077
+  },
+  "transfer_gap": 0.2988952841718547,
+  "cv_results": {
+    "A source only": {
+      "mean": 0.28022068580028114,
+      "std": 0.034357363636852406
+    },
+    "B target only": {
+      "mean": 0.6794405739088738,
+      "std": 0.03278232582033332
+    },
+    "C adapted": {
+      "mean": 0.49206662413195373,
+      "std": 0.03615422067481623
+    }
+  },
+  "winning_recipe": "B target only",
+  "learning_curve": [
+    {
+      "n": 57,
+      "macro_f1": 0.41586716500123416
+    },
+    {
+      "n": 114,
+      "macro_f1": 0.5373263516768698
+    },
+    {
+      "n": 171,
+      "macro_f1": 0.6198885485946328
+    },
+    {
+      "n": 228,
+      "macro_f1": 0.6794405739088738
+    }
+  ],
+  "upweight": 120
+}

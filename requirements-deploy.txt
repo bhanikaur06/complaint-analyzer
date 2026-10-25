@@ -1,0 +1,7 @@
+# Runtime dependencies for the hosted web app only.
+# scikit-learn is pinned to the exact version the model was saved with,
+# because a pickled model is not guaranteed to load in a different version.
+scikit-learn==1.8.0
+numpy==2.4.4
+scipy==1.17.1
+joblib==1.5.3

@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Complaint Emotion &amp; Urgency Analyzer — v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#DDE2E6; --panel:#FBFBFA; --ink:#16202B; --muted:#5D6B77;
+  --line:#C4CCD3; --line-soft:#E2E7EA;
+  --p1:#B23A2B; --p2:#C07414; --p3:#3E7C8C; --p4:#5F7A63;
+  --anger:#B23A2B; --frustration:#C07414; --disappointment:#75629E;
+  --anxiety:#3E7C8C; --satisfaction:#4F7A4A; --neutral:#6E7C87;
+  --sans:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 18px 64px}
+
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px;padding-bottom:14px;border-bottom:2px solid var(--ink)}
+h1{font-size:clamp(23px,3vw,32px);font-weight:600;letter-spacing:-0.025em;line-height:1.1;margin:0}
+header p{margin:2px 0 0;color:var(--muted);max-width:46ch;font-size:13.5px}
+.build{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:2px;padding:3px 8px;background:var(--panel);white-space:nowrap}
+.spacer{flex:1}
+
+nav{display:flex;gap:2px;margin:0 0 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav button{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--sans);font-size:14px;font-weight:500;padding:11px 15px;cursor:pointer;margin-bottom:-1px}
+nav button:hover{color:var(--ink)}
+nav button.on{color:var(--ink);border-bottom-color:var(--ink)}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:18px;margin-bottom:18px}
+.panel h2{font-size:15px;font-weight:600;margin:0 0 3px}
+.panel .hint{color:var(--muted);font-size:13px;margin:0 0 14px}
+h3.sub{font-size:12.5px;font-weight:600;color:var(--muted);margin:0 0 8px}
+
+.grid2{display:grid;grid-template-columns:0.88fr 1.12fr;gap:18px;align-items:start}
+.grid2b{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+@media(max-width:880px){.grid2,.grid2b{grid-template-columns:1fr}}
+
+textarea,input[type=text],select{width:100%;font-family:var(--sans);font-size:14.5px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:2px;padding:10px 11px}
+textarea{min-height:150px;resize:vertical;line-height:1.6}
+label.fld{display:block;font-size:12.5px;color:var(--muted);margin:10px 0 4px}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:12px}
+button.act{font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;border-radius:2px;padding:9px 15px;border:1px solid var(--ink);background:var(--ink);color:#fff}
+button.act:hover{background:#28394a}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+button.ghost:hover{background:#EDF0F2}
+button.sm{padding:5px 10px;font-size:12.5px}
+textarea:focus,input:focus,select:focus,button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+.chip{display:block;width:100%;text-align:left;font-family:var(--sans);font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:2px;padding:7px 10px;margin-bottom:5px;cursor:pointer;line-height:1.4}
+.chip:hover{background:#EDF0F2}
+.chip b{font-weight:500}
+
+/* urgency meter */
+.meter .readout{display:flex;align-items:baseline;gap:9px;margin-bottom:9px}
+.meter .score{font-family:var(--mono);font-size:46px;font-weight:500;line-height:1;letter-spacing:-0.03em}
+.meter .of{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.meter .band{margin-left:auto;font-size:14px;font-weight:600}
+.track{position:relative;height:30px;border:1px solid var(--line);border-radius:2px;overflow:hidden;display:flex}
+.track .seg{height:100%;position:relative}
+.track .seg span{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10.5px;opacity:.62}
+.needle{position:absolute;top:-6px;bottom:-6px;width:3px;background:var(--ink);transition:left .4s cubic-bezier(.2,.7,.2,1)}
+.needle::after{content:"";position:absolute;top:-4px;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--ink)}
+.scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:5px}
+
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:2px;margin:18px 0}
+.fact{background:var(--panel);padding:10px 12px}
+.fact dt{font-size:11.5px;color:var(--muted);margin:0 0 2px}
+.fact dd{margin:0;font-size:15px;font-weight:600;line-height:1.3}
+@media(max-width:700px){.facts{grid-template-columns:1fr 1fr}}
+
+.bars{margin:0}
+.bar{display:grid;grid-template-columns:104px 1fr 48px;align-items:center;gap:9px;margin-bottom:5px;font-size:13px}
+.bar .t{height:9px;background:var(--line-soft);border-radius:1px;overflow:hidden}
+.bar .t i{display:block;height:100%;border-radius:1px;transition:width .4s ease}
+.bar .v{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+
+.evidence{background:#fff;border:1px solid var(--line-soft);border-radius:2px;padding:12px;font-size:14.5px;line-height:1.85}
+mark{background:transparent;padding:0 1px;border-bottom:2px solid currentColor;color:inherit}
+mark.e-anger{color:var(--anger)} mark.e-frustration{color:var(--frustration)}
+mark.e-disappointment{color:var(--disappointment)} mark.e-anxiety{color:var(--anxiety)}
+mark.e-satisfaction{color:var(--satisfaction)} mark.u-hit{color:var(--ink);border-bottom-style:dotted;background:#EEF1F3}
+.legend{display:flex;flex-wrap:wrap;gap:11px;margin-top:8px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:4px}
+
+.flag{border-left:3px solid var(--p2);background:#FBF3E6;padding:8px 11px;font-size:13px;margin-bottom:12px}
+.flag.crit{border-left-color:var(--p1);background:#F8ECEA}
+.flag b{font-weight:600}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+th{font-size:12px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line)}
+td.num,th.num{text-align:right;font-family:var(--mono);white-space:nowrap}
+td.ctr,th.ctr{text-align:center;font-family:var(--mono)}
+tbody tr:hover{background:#F2F5F6}
+.scroll{overflow-x:auto}
+.pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 6px;border-radius:2px;color:#fff;font-family:var(--mono)}
+.pill.P1{background:var(--p1)}.pill.P2{background:var(--p2)}.pill.P3{background:var(--p3)}.pill.P4{background:var(--p4)}
+.tag{display:inline-block;font-size:11.5px;padding:1px 6px;border:1px solid var(--line);border-radius:2px;color:var(--muted);background:#fff}
+.empty{color:var(--muted);font-size:14px;padding:10px 0}
+.done td{opacity:.45}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.filters select,.filters input{width:auto;min-width:130px;padding:6px 9px;font-size:13px}
+
+.cm td,.cm th{text-align:center;font-family:var(--mono);font-size:12.5px;padding:6px 8px;border:1px solid var(--line-soft)}
+.cm th{font-family:var(--sans);font-size:11.5px}
+.cm td.diag{background:#E4EDE6;font-weight:600}
+.cm td.err{background:#F6E9E7}
+.cm th.rowh{text-align:right;font-weight:500;color:var(--muted)}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:16px}
+.kpi{background:var(--panel);padding:12px}
+.kpi .n{font-family:var(--mono);font-size:26px;font-weight:500;line-height:1.1}
+.kpi .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+@media(max-width:700px){.kpis{grid-template-columns:1fr 1fr}}
+
+.pipeline ol{margin:0;padding-left:0;list-style:none;counter-reset:step}
+.pipeline li{counter-increment:step;position:relative;padding:8px 0 8px 32px;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.pipeline li:last-child{border-bottom:none}
+.pipeline li::before{content:counter(step);position:absolute;left:0;top:9px;font-family:var(--mono);font-size:11.5px;color:var(--muted);border:1px solid var(--line);border-radius:2px;width:19px;height:19px;display:flex;align-items:center;justify-content:center;background:#fff}
+.pipeline li span{color:var(--muted)}
+
+pre.out{background:#fff;border:1px solid var(--line-soft);border-radius:2px;padding:11px;font-family:var(--mono);font-size:12px;overflow:auto;max-height:260px;margin:0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:9px 15px;border-radius:2px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+.toast.show{opacity:1}
+.hide{display:none!important}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Complaint emotion &amp; urgency analyzer</h1>
+    <p>Hybrid system: a trained Naive Bayes classifier for emotion, a weighted rule engine for urgency, and a safety override on top of both.</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="build">v1.0 &nbsp;hybrid ML + rules</div>
+</header>
+
+<nav>
+  <button class="on" data-tab="analyze">Analyze</button>
+  <button data-tab="queue">Triage queue</button>
+  <button data-tab="insights">Insights</button>
+  <button data-tab="model">Model</button>
+  <button data-tab="data">Dataset</button>
+  <button data-tab="about">How it works</button>
+</nav>
+
+<!-- ================= ANALYZE ================= -->
+<section id="tab-analyze">
+<div class="grid2">
+  <div class="panel">
+    <h2>Complaint text</h2>
+    <p class="hint">English or Hinglish. Common misspellings are corrected automatically.</p>
+    <textarea id="input" placeholder="Type or paste a complaint…"></textarea>
+    <label class="fld" for="engine">Emotion engine</label>
+    <select id="engine">
+      <option value="hybrid">Hybrid — model, rules break ties</option>
+      <option value="ml">Trained model only</option>
+      <option value="rules">Rule engine only</option>
+    </select>
+    <div class="row">
+      <button class="act" id="analyze">Analyze</button>
+      <button class="act ghost" id="queueBtn">Add to queue</button>
+      <button class="act ghost" id="clear">Clear</button>
+    </div>
+    <p class="hint" style="margin:10px 0 0">Ctrl+Enter analyzes from the text box.</p>
+
+    <div style="margin-top:16px;border-top:1px solid var(--line-soft);padding-top:13px">
+      <h3 class="sub">Sample complaints</h3>
+      <div id="sampleList"></div>
+    </div>
+
+    <div style="margin-top:14px;border-top:1px solid var(--line-soft);padding-top:13px">
+      <h3 class="sub">Bulk analysis</h3>
+      <p class="hint" style="margin-bottom:8px">One complaint per line. Each is scored and added to the queue.</p>
+      <textarea id="bulk" style="min-height:80px" placeholder="Paste many complaints, one per line…"></textarea>
+      <div class="row"><button class="act ghost sm" id="bulkRun">Process all lines</button></div>
+    </div>
+  </div>
+
+  <div class="panel" id="resultPanel">
+    <h2>Analysis</h2>
+    <p class="hint" id="resultHint">Results appear here after you analyze a complaint.</p>
+    <div id="resultBody" hidden>
+      <div id="flags"></div>
+      <div class="meter">
+        <div class="readout">
+          <span class="score" id="uScore">0</span><span class="of">/ 100 urgency</span>
+          <span class="band" id="uBand"></span>
+        </div>
+        <div class="track">
+          <div class="seg" style="width:30%;background:rgba(95,122,99,.18)"><span>P4</span></div>
+          <div class="seg" style="width:22%;background:rgba(62,124,140,.20)"><span>P3</span></div>
+          <div class="seg" style="width:18%;background:rgba(192,116,20,.22)"><span>P2</span></div>
+          <div class="seg" style="width:30%;background:rgba(178,58,43,.22)"><span>P1</span></div>
+          <div class="needle" id="needle" style="left:0%"></div>
+        </div>
+        <div class="scale"><span>0</span><span>30</span><span>52</span><span>70</span><span>100</span></div>
+      </div>
+
+      <dl class="facts">
+        <div class="fact"><dt>Emotion</dt><dd id="fEmotion">—</dd></div>
+        <div class="fact"><dt>Intensity</dt><dd id="fIntensity">—</dd></div>
+        <div class="fact"><dt>Category</dt><dd id="fCategory">—</dd></div>
+        <div class="fact"><dt>Respond by</dt><dd id="fSla">—</dd></div>
+      </dl>
+
+      <div style="margin-bottom:18px">
+        <h3 class="sub">Emotion profile</h3>
+        <div class="bars" id="emoBars"></div>
+      </div>
+
+      <div style="margin-bottom:18px">
+        <h3 class="sub">What the analyzer saw</h3>
+        <div class="evidence" id="evidence"></div>
+        <div class="legend" id="legend"></div>
+      </div>
+
+      <div style="margin-bottom:18px">
+        <h3 class="sub">Suggested reply</h3>
+        <textarea id="reply" style="min-height:120px"></textarea>
+        <div class="row"><button class="act ghost sm" id="copyReply">Copy reply</button></div>
+      </div>
+
+      <div class="grid2b">
+        <div>
+          <h3 class="sub">Emotion signals</h3>
+          <div class="scroll"><table id="emoTable"></table></div>
+          <div class="empty hide" id="emoEmpty">No emotion words matched.</div>
+        </div>
+        <div>
+          <h3 class="sub">Urgency signals</h3>
+          <div class="scroll"><table id="urgTable"></table></div>
+        </div>
+      </div>
+
+      <div style="margin-top:18px">
+        <h3 class="sub">API response</h3>
+        <pre class="out" id="jsonOut"></pre>
+        <div class="row"><button class="act ghost sm" id="copyJson">Copy JSON</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ================= QUEUE ================= -->
+<section id="tab-queue" class="hide">
+  <div class="panel">
+    <h2>Triage queue</h2>
+    <p class="hint">Sorted by urgency. This is the order a support team should work in.</p>
+    <div class="filters">
+      <select id="fPriority"><option value="">All priorities</option><option>P1</option><option>P2</option><option>P3</option><option>P4</option></select>
+      <select id="fEmotionSel"><option value="">All emotions</option></select>
+      <select id="fCategorySel"><option value="">All categories</option></select>
+      <select id="fStatus"><option value="">All statuses</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
+      <input type="text" id="fSearch" placeholder="Search text…">
+      <div class="spacer"></div>
+      <button class="act ghost sm" id="exportCsv">Export CSV</button>
+      <button class="act ghost sm" id="clearQueue">Clear queue</button>
+    </div>
+    <div class="scroll"><table>
+      <thead><tr>
+        <th style="width:62px">Priority</th><th class="num" style="width:62px">Urgency</th>
+        <th style="width:112px">Emotion</th><th style="width:96px">Category</th>
+        <th>Complaint</th><th style="width:118px">Respond by</th><th style="width:88px"></th>
+      </tr></thead>
+      <tbody id="qBody"></tbody>
+    </table></div>
+    <div class="empty" id="qEmpty">Queue is empty. Analyze a complaint and add it here.</div>
+  </div>
+</section>
+
+<!-- ================= INSIGHTS ================= -->
+<section id="tab-insights" class="hide">
+  <div class="panel">
+    <h2>Insights</h2>
+    <p class="hint">Live summary of everything currently in the triage queue.</p>
+    <div class="kpis">
+      <div class="kpi"><div class="n" id="kTotal">0</div><div class="l">Complaints in queue</div></div>
+      <div class="kpi"><div class="n" id="kCritical">0</div><div class="l">P1 critical, still open</div></div>
+      <div class="kpi"><div class="n" id="kAvg">0</div><div class="l">Mean urgency score</div></div>
+      <div class="kpi"><div class="n" id="kNeg">0%</div><div class="l">Negative sentiment share</div></div>
+    </div>
+    <div class="grid2b">
+      <div><h3 class="sub">Emotion distribution</h3><div class="bars" id="chartEmotion"></div></div>
+      <div><h3 class="sub">Priority distribution</h3><div class="bars" id="chartPriority"></div></div>
+    </div>
+    <div class="grid2b" style="margin-top:18px">
+      <div><h3 class="sub">Complaints by category</h3><div class="bars" id="chartCategory"></div></div>
+      <div><h3 class="sub">Mean urgency by category</h3><div class="bars" id="chartCatUrg"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MODEL ================= -->
+<section id="tab-model" class="hide">
+  <div class="panel">
+    <h2>Trained model</h2>
+    <p class="hint">Multinomial Naive Bayes with Laplace smoothing, trained in the browser on the built-in labelled corpus. Unigram and bigram features, stop words removed.</p>
+    <div class="row" style="margin-top:0">
+      <label class="fld" style="margin:0">Training share</label>
+      <select id="splitSel" style="width:auto"><option value="0.7">70 / 30</option><option value="0.75" selected>75 / 25</option><option value="0.8">80 / 20</option></select>
+      <label class="fld" style="margin:0">Random seed</label>
+      <input type="text" id="seedIn" value="42" style="width:76px">
+      <button class="act" id="trainBtn">Train and evaluate</button>
+    </div>
+    <div id="modelOut" class="hide" style="margin-top:18px">
+      <div class="kpis">
+        <div class="kpi"><div class="n" id="mAccE">—</div><div class="l">Emotion accuracy (model)</div></div>
+        <div class="kpi"><div class="n" id="mAccR">—</div><div class="l">Emotion accuracy (rules)</div></div>
+        <div class="kpi"><div class="n" id="mAccP">—</div><div class="l">Priority accuracy (model)</div></div>
+        <div class="kpi"><div class="n" id="mAccPR">—</div><div class="l">Priority accuracy (rules)</div></div>
+      </div>
+      <div class="grid2b">
+        <div>
+          <h3 class="sub">Confusion matrix — emotion, model on test set</h3>
+          <div class="scroll"><table class="cm" id="cmE"></table></div>
+          <p class="hint" style="margin-top:7px">Rows are the true label, columns the prediction. The diagonal is correct.</p>
+        </div>
+        <div>
+          <h3 class="sub">Per-class scores — emotion, model</h3>
+          <div class="scroll"><table id="prfE"></table></div>
+        </div>
+      </div>
+      <div style="margin-top:18px">
+        <h3 class="sub">Learning curve</h3>
+        <p class="hint" style="margin-bottom:9px">Accuracy against the number of training examples, averaged over six random splits.</p>
+        <div class="bars" id="curveChart"></div>
+        <p class="hint" id="curveNote" style="margin-top:7px"></p>
+      </div>
+      <div style="margin-top:18px">
+        <h3 class="sub">Most informative features</h3>
+        <p class="hint" style="margin-bottom:9px">The words the model leans on most for each emotion, by log-likelihood ratio.</p>
+        <div class="scroll"><table id="featTable"></table></div>
+      </div>
+      <div style="margin-top:18px">
+        <h3 class="sub">Misclassified test examples</h3>
+        <div class="scroll"><table id="errTable"></table></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DATA ================= -->
+<section id="tab-data" class="hide">
+  <div class="panel">
+    <h2>Labelled dataset</h2>
+    <p class="hint">The corpus the model trains on. Add your own labelled complaints here — they are used the next time you train.</p>
+    <div class="grid2b">
+      <div>
+        <label class="fld">Complaint text</label>
+        <textarea id="newText" style="min-height:76px" placeholder="Paste a complaint to label…"></textarea>
+        <div class="row">
+          <select id="newEmotion" style="width:auto"></select>
+          <select id="newPriority" style="width:auto"><option>P1</option><option>P2</option><option selected>P3</option><option>P4</option></select>
+          <button class="act sm" id="addLabelled">Add to dataset</button>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Class balance</h3>
+        <div class="bars" id="corpusBars"></div>
+        <div class="row">
+          <button class="act ghost sm" id="exportCorpus">Export dataset CSV</button>
+        </div>
+      </div>
+    </div>
+    <div class="filters" style="margin-top:16px">
+      <select id="dFilterEmotion"><option value="">All emotions</option></select>
+      <input type="text" id="dSearch" placeholder="Search corpus…">
+      <div class="spacer"></div>
+      <span class="hint" id="corpusCount" style="margin:0"></span>
+    </div>
+    <div class="scroll" style="max-height:420px;overflow-y:auto">
+      <table><thead><tr><th style="width:44px">#</th><th>Complaint</th><th style="width:120px">Emotion</th><th style="width:64px">Priority</th></tr></thead><tbody id="corpusBody"></tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section id="tab-about" class="hide">
+  <div class="panel pipeline">
+    <h2>How a complaint is processed</h2>
+    <p class="hint">Every stage is visible in the output, so no score is unexplainable.</p>
+    <ol>
+      <li><b>Normalize</b> <span>— trim whitespace and correct common misspellings and chat shorthand such as "plz" and "urgnt".</span></li>
+      <li><b>Classify emotion with the model</b> <span>— Naive Bayes over unigram and bigram features returns a probability for each of the six emotions.</span></li>
+      <li><b>Score emotion with the rules</b> <span>— weighted lexicon matching with intensifier, diminisher and negation handling, used to break ties and to supply the evidence highlighting.</span></li>
+      <li><b>Combine</b> <span>— in hybrid mode the model decides unless it is unconfident, in which case the rule engine's dominant emotion wins.</span></li>
+      <li><b>Score urgency</b> <span>— weighted urgency keywords, escalation threats, de-escalating phrases, capitals and exclamation marks, plus a share of the emotional intensity.</span></li>
+      <li><b>Apply the safety override</b> <span>— a hazard phrase forces urgency to at least 78, so a calmly worded emergency can never land in the low queue.</span></li>
+      <li><b>Route and schedule</b> <span>— keyword matching assigns a department, and the priority band sets the response deadline.</span></li>
+      <li><b>Draft a reply</b> <span>— a template is selected by emotion and priority and filled with the detected category.</span></li>
+    </ol>
+  </div>
+  <div class="panel">
+    <h2>Known limitations</h2>
+    <p class="hint">Worth stating openly — these define the next iteration.</p>
+    <ul style="margin:0;padding-left:18px;font-size:14px;color:var(--muted)">
+      <li>The corpus is authored for this project, not sampled from live support tickets, so accuracy demonstrates the method rather than production performance.</li>
+      <li>A hundred examples across six classes is a small training set; the rarer classes have very few examples each.</li>
+      <li>Sarcasm still inverts the result. The system flags conflicting signals but cannot resolve them.</li>
+      <li>Hinglish coverage is partial — a handful of common terms, not real code-mixed language support.</li>
+      <li>Only one emotion is reported as dominant, though the full profile is shown.</li>
+      <li>Urgency weights are hand-tuned rather than learned, because urgency labels are sparser than emotion labels.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==========================================================================
+   Complaint Emotion & Urgency Analyzer — v1.0
+   Hybrid: Multinomial Naive Bayes (emotion) + weighted rule engine (urgency)
+   No dependencies. All computation runs in the browser.
+   ========================================================================== */
+
+/* ---------- 1. Lexicons and configuration ---------- */
+
+const EMOTION_TERMS = [
+  ['anger', 3, ['furious','outrageous','unacceptable','ridiculous','disgusted','appalled','pathetic','insulting','rude','cheated','fraud','scam','harassment','nonsense','shameful','robbed','worst','how dare','daylight robbery','kharab','bekar','bakwas']],
+  ['anger', 2, ['angry','terrible','horrible','awful','fed up','sick of','disgusting','useless','careless','irresponsible','bad experience','false promise','blaming me']],
+
+  ['frustration', 3, ['frustrated','frustrating','no response','no reply','nobody has replied','no one has replied','nobody has bothered','ignored','third time','3rd time','fourth time','again and again','still no update','chasing','no one responds','nobody takes ownership','pareshan','sunwai nahi']],
+  ['frustration', 2, ['annoyed','annoying','still waiting','waiting','delay','delayed','pending','follow up','followed up','repeatedly','once again','yet again','stuck','disconnect','no update','keep getting','tired of','bar bar','nahi mila','dikkat']],
+
+  ['disappointment', 3, ['disappointed','disappointing','let down','expected better','expected much better','regret']],
+  ['disappointment', 2, ['unhappy','not happy','dissatisfied','unsatisfied','poor service','poor quality','poor','sad','standards drop','not what i expected','nowhere near']],
+
+  ['anxiety', 3, ['emergency','safety hazard','dangerous','unsafe','scared','panic','terrified','hazard','gas leak','on fire','electric shock','compromised','unauthorized']],
+  ['anxiety', 2, ['worried','anxious','concerned','afraid','nervous','risk','leak','elderly parents','small children','alone at home','out of stock','is this safe','strange noise','deadline is tomorrow']],
+
+  ['satisfaction', 3, ['thank you','thanks','appreciate','excellent','great job','very helpful','resolved quickly','works perfectly','would recommend']],
+  ['satisfaction', 2, ['happy','satisfied','good service','good job','polite','helpful','smooth','stable now','quickly','prompt','patient','early']]
+];
+
+const URGENCY_TERMS = [
+  [5, ['immediately','right now','emergency','urgent','urgently','asap','at once','safety hazard','leak','gas leak','smell of gas','unsafe','hazard','on fire','smoke','short circuit','electric shock','burning smell','sparking','hospital','medical','ambulance','injured','stranded','flood','unauthorized','security breach','account hacked','theft','break in','turant','abhi']],
+  [4, ['today','tonight','tomorrow','due tomorrow','deadline','flight','exam','not working','cannot access','unable to access','blocked','locked out','outage','server down','no service','no power','no water','debited twice','double charged','not refunded','refund','swallowed my card','never received','wrong medicine','jaldi']],
+  [3, ['this week','within 24 hours','escalate','escalation','overdue','missed','still waiting','no update','no reply','nobody has replied','disconnect','third time','3rd time','fourth time','entire office','cannot work']],
+  [2, ['soon','pending','delay','delayed','follow up','waiting','mismatch','issue','problem','complaint','error','higher than usual']],
+  [1, ['sometime','suggestion','feedback','minor','small','whenever']]
+];
+
+const HAZARD_TERMS = ['gas leak','smell of gas','gas smell','on fire','caught fire','smoke','short circuit','electric shock','live wire','burning smell','sparking','chest pain','unconscious','bleeding','breathing problem','ambulance','food poisoning','child missing','break in','robbery','account hacked','security breach','stuck between floors','wrong medicine'];
+const DE_ESCALATORS = ['no rush','no hurry','whenever you get time','whenever you get a chance','not urgent','take your time','at your convenience','low priority','minor issue'];
+const THREATS = ['consumer court','legal action','lawyer','ombudsman','social media','twitter','file a case','cancel my subscription','close my account','never buy again','report this publicly'];
+
+const INTENSIFIERS = ['very','extremely','really','so','totally','absolutely','completely','highly','quite','too','utterly','seriously','super','bohot','bahut'];
+const DIMINISHERS = ['slightly','somewhat','little','minor','marginally','bit'];
+const NEGATIONS = ['not','no','never',"don't",'dont',"didn't",'didnt',"isn't",'isnt',"wasn't",'wasnt',"can't",'cant','cannot',"won't",'wont','hardly','barely','without'];
+
+// Department routing
+const CATEGORIES = {
+  Billing:  ['bill','billing','invoice','charge','charged','payment','refund','debited','emi','gst','price','amount','transaction','statement','receipt','deduct'],
+  Delivery: ['delivery','deliver','delivered','order','courier','shipment','parcel','package','dispatch','out for delivery','address'],
+  Technical:['app','website','server','login','otp','network','internet','connection','error','crash','down','broadband','router','software','installation'],
+  Safety:   ['gas','leak','fire','shock','spark','burning','hazard','unsafe','wiring','cylinder','smoke','poisoning','medicine','lift'],
+  Staff:    ['agent','executive','technician','engineer','staff','rude','behaviour','behavior','customer care','representative','called back'],
+  Product:  ['product','item','quality','broken','damaged','defective','replacement','warranty','fabric','battery','model','machine']
+};
+
+// Spelling and shorthand normalisation applied before analysis
+const SPELLING = {
+  'urgnt':'urgent','urgentt':'urgent','plz':'please','pls':'please','recieve':'receive','recieved':'received',
+  'refnd':'refund','complnt':'complaint','sevice':'service','servic':'service','dissapointed':'disappointed',
+  'disapointed':'disappointed','frusterated':'frustrated','immediatly':'immediately','immediatley':'immediately',
+  'u':'you','ur':'your','thx':'thanks','tnx':'thanks','nt':'not','dnt':'dont','msg':'message','acc':'account',
+  'problm':'problem','prblm':'problem','wrkng':'working','cstmr':'customer'
+};
+
+const EMOTION_META = {
+  anger:{label:'Anger',cls:'anger'}, frustration:{label:'Frustration',cls:'frustration'},
+  disappointment:{label:'Disappointment',cls:'disappointment'}, anxiety:{label:'Anxiety',cls:'anxiety'},
+  satisfaction:{label:'Satisfaction',cls:'satisfaction'}, neutral:{label:'Neutral',cls:'neutral'}
+};
+const EMOTION_KEYS = Object.keys(EMOTION_META);
+
+const CFG = {
+  urgencyBase:8, keywordGain:2.6,
+  deEscalatorPenalty:12, deEscalatorCap:20,
+  threatBonus:16, threatCap:24,
+  exclamationGain:2, exclamationCapCount:4,
+  capsGain:3, capsCapCount:3,
+  intensityGain:0.35, criticalFloor:78,
+  mlConfidenceFloor:0.42,
+  thresholds:{P1:70,P2:52,P3:30}
+};
+const SLA_HOURS = {P1:1, P2:8, P3:48, P4:120};
+const SLA_TEXT  = {P1:'Within 1 hour', P2:'Same day', P3:'Within 2 working days', P4:'Normal queue'};
+
+/* ---------- 2. Labelled corpus (100 examples) ---------- */
+
+const BASE_CORPUS = [
+["This is completely unacceptable. I have been charged twice and nobody is answering.","anger","P2"],
+["Your delivery agent was extremely rude to my mother. I want an apology.","anger","P2"],
+["Worst service I have ever seen. You people are cheating customers openly.","anger","P3"],
+["I am furious. The product arrived broken and your team is blaming me for it.","anger","P2"],
+["This is daylight robbery. You charged 2000 rupees extra without informing me.","anger","P2"],
+["Absolutely pathetic experience. Three months and the issue is still not fixed.","anger","P2"],
+["Your executive hung up on me. That is disgusting behaviour.","anger","P3"],
+["I am being harassed by your recovery agents every single day. Stop this.","anger","P1"],
+["Shameful. You took my money and delivered an empty box.","anger","P1"],
+["Ridiculous policy. Why should I pay for your mistake?","anger","P3"],
+["I am sick of your false promises. Every week there is a new excuse.","anger","P2"],
+["The technician came drunk to my house. This is outrageous.","anger","P1"],
+["You people are frauds. My subscription renewed without my consent.","anger","P2"],
+["Totally useless app. It crashes every time I try to make a payment.","anger","P3"],
+["How dare you deduct money from my account without permission.","anger","P1"],
+["I will file a complaint in consumer court if this is not resolved by tomorrow.","anger","P2"],
+["If I do not get a response today I am going to post all of this on social media.","anger","P2"],
+["Food poisoning after eating from your outlet. I had to visit the hospital.","anger","P1"],
+["Bahut kharab service hai, koi sunwai nahi hoti.","anger","P3"],
+["Your staff lied to me on the phone. This is unacceptable behaviour.","anger","P2"],
+
+["I have called customer care six times this week and the issue is still open.","frustration","P2"],
+["Still waiting for my refund. It has been twenty days now.","frustration","P2"],
+["This is the third time I am raising this ticket. No one responds.","frustration","P2"],
+["Every time I call I am told someone will call back. Nobody ever does.","frustration","P2"],
+["My complaint number is 44512 and there has been no update for two weeks.","frustration","P3"],
+["I keep getting transferred between departments and nobody takes ownership.","frustration","P3"],
+["The same error is coming again and again even after reinstalling the app.","frustration","P3"],
+["I have shared the documents four times already. Please stop asking again.","frustration","P3"],
+["Internet keeps disconnecting every hour. The engineer visited twice with no solution.","frustration","P2"],
+["Bar bar call kar raha hoon par koi response nahi mil raha.","frustration","P2"],
+["Order status has been showing out for delivery since Monday.","frustration","P3"],
+["Why is it so difficult to get a simple address change done?","frustration","P3"],
+["No reply to my email from last Tuesday. Following up again.","frustration","P3"],
+["I am tired of repeating my problem to every new agent.","frustration","P3"],
+["Replacement request was approved but nothing has moved in ten days.","frustration","P2"],
+["Power has been out in our entire lane since morning and it is 42 degrees.","frustration","P1"],
+["No water supply for three days in the building. Children are suffering.","frustration","P1"],
+["Server is down and our entire office cannot work. Please escalate immediately.","frustration","P1"],
+["The courier marked it delivered but I never received the parcel.","frustration","P2"],
+["Mujhe abhi tak refund nahi mila, bohot pareshan hoon.","frustration","P2"],
+["The AC installation is still pending since booking. No rush but please update.","frustration","P4"],
+["Ticket was closed without solving anything and I had to reopen it.","frustration","P3"],
+
+["I expected much better from a brand like yours. Very disappointed.","disappointment","P3"],
+["The quality of the fabric is poor compared to what was shown online.","disappointment","P4"],
+["Been a customer for eight years and this is how I am treated.","disappointment","P3"],
+["Honestly let down by the service this time. It used to be so good.","disappointment","P3"],
+["The food arrived cold and tasteless. Not what I expected at all.","disappointment","P3"],
+["Not happy with the resolution offered. It does not cover my loss.","disappointment","P3"],
+["Sad to see the standards drop so much in just one year.","disappointment","P4"],
+["The room did not match the photos at all. Quite disappointing.","disappointment","P3"],
+["I regret upgrading to the premium plan. There is no real difference.","disappointment","P4"],
+["Expected faster delivery given the price I paid for it.","disappointment","P3"],
+["The battery backup is nowhere near what was advertised.","disappointment","P3"],
+["Service was fine but the follow up was really poor.","disappointment","P4"],
+["Disappointed that the offer was withdrawn after I had already paid.","disappointment","P3"],
+["The finish on the product looks cheap for this price point.","disappointment","P4"],
+["Your new app update has made everything harder to use.","disappointment","P4"],
+
+["There is a gas leak in my kitchen. Please send someone urgently.","anxiety","P1"],
+["I can smell burning from the wiring near the meter and I am scared.","anxiety","P1"],
+["My account shows an unauthorized transaction of 45000 rupees. Please block it.","anxiety","P1"],
+["The lift is stuck between floors with my daughter inside.","anxiety","P1"],
+["I am worried because my medicine order has not arrived and I am out of stock.","anxiety","P1"],
+["Water is leaking from the ceiling and the wires are right below it.","anxiety","P1"],
+["My flight is in six hours and the booking still shows pending.","anxiety","P1"],
+["Someone has my OTP and I think my account is compromised.","anxiety","P1"],
+["Wrong medicine was delivered to my father. Please correct this today.","anxiety","P1"],
+["The washing machine is sparking when switched on.","anxiety","P1"],
+["Payment of 120000 was debited but the order was not placed. I need urgent reversal.","anxiety","P1"],
+["I am stranded at the airport, my cab booking was cancelled twice.","anxiety","P1"],
+["The cylinder delivered has a damaged seal. Is this safe to use?","anxiety","P2"],
+["I am concerned about the delay since my exam form deadline is tomorrow.","anxiety","P2"],
+["My elderly father is alone at home and the alarm is not working.","anxiety","P2"],
+["There is a strange noise from the geyser and I am afraid to use it.","anxiety","P2"],
+["I have not received the policy document and my coverage starts next week.","anxiety","P3"],
+["My EMI is due tomorrow and the refund has still not come.","anxiety","P2"],
+
+["Thank you for sorting this out so quickly. I really appreciate it.","satisfaction","P4"],
+["The engineer was polite and fixed the issue in ten minutes.","satisfaction","P4"],
+["Great service. The refund came through on the same day.","satisfaction","P4"],
+["Very happy with the replacement. It works perfectly now.","satisfaction","P4"],
+["Appreciate the quick callback. The issue is resolved.","satisfaction","P4"],
+["Excellent support from your team today. Please pass on my thanks.","satisfaction","P4"],
+["The delivery was early and the packaging was excellent.","satisfaction","P4"],
+["Smooth experience overall. I would recommend this to friends.","satisfaction","P4"],
+["Thanks for the upgrade, the connection is stable now.","satisfaction","P4"],
+["Your agent was extremely helpful and patient with all my questions.","satisfaction","P4"],
+["Issue resolved. Thanks for the follow up call.","satisfaction","P4"],
+["Good job on the quick installation. Very satisfied with the work.","satisfaction","P4"],
+["Thank you for the prompt replacement, everything is working now.","satisfaction","P4"],
+["Happy with how fast the complaint was closed this time.","satisfaction","P4"],
+["The new plan is good value and the switch was painless.","satisfaction","P4"],
+
+["Please share the invoice for order 88231 for my records.","neutral","P4"],
+["I want to update my registered mobile number.","neutral","P4"],
+["What is the process for returning an item bought last month?","neutral","P4"],
+["Kindly confirm whether my plan includes international roaming.","neutral","P4"],
+["Requesting a duplicate receipt for the payment made on 12 August.","neutral","P4"],
+["Please change my delivery address to the office location.","neutral","P3"],
+["I would like to know the warranty period for this model.","neutral","P4"],
+["Can you confirm if the service centre is open on Sunday?","neutral","P4"],
+["There is a small mismatch in the GST number on the invoice.","neutral","P3"],
+["Please cancel my order 55120 as I ordered it by mistake.","neutral","P3"],
+["I need a copy of my statement for the last six months.","neutral","P4"],
+["Is there any charge for changing the appointment date?","neutral","P4"],
+["Billing amount seems higher than usual this month. Please check.","neutral","P3"],
+["The app shows a different price than the website. Minor issue but confusing.","neutral","P4"],
+["Could you please explain the late payment charge on my bill?","neutral","P3"],
+["Please arrange a callback at your convenience regarding my plan.","neutral","P4"]
+].map((r,i)=>({id:i+1, text:r[0], emotion:r[1], priority:r[2], source:'built-in'}));
+
+let CORPUS = BASE_CORPUS.slice();
+
+/* ---------- 3. Text helpers ---------- */
+
+function escapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// Correct common misspellings and chat shorthand before anything else runs.
+function normalizeSpelling(text){
+  const fixes = [];
+  const out = text.replace(/\b[\w']+\b/g, w => {
+    const k = w.toLowerCase();
+    if(SPELLING[k]){ fixes.push(w + ' → ' + SPELLING[k]); return SPELLING[k]; }
+    return w;
+  });
+  return {text:out, fixes};
+}
+
+// Light stemming: a single word also matches its plural, past and -ing forms.
+function toPattern(term){
+  const esc = escapeRe(term).replace(/\s+/g,'\\s+');
+  return (!/\s/.test(term) && term.length >= 4) ? esc + '(?:s|es|ed|ing)?' : esc;
+}
+
+function findMatches(text, table){
+  const found = [];
+  const isEmo = table === EMOTION_TERMS;
+  for(const row of table){
+    const key = isEmo ? row[0] : null;
+    const weight = isEmo ? row[1] : row[0];
+    const terms = isEmo ? row[2] : row[1];
+    for(const term of terms){
+      const re = new RegExp('\\b'+toPattern(term)+'\\b','gi');
+      let m;
+      while((m = re.exec(text)) !== null){
+        found.push({term,key,weight,start:m.index,end:m.index+m[0].length,surface:m[0]});
+        if(m.index === re.lastIndex) re.lastIndex++;
+      }
+    }
+  }
+  return resolveOverlaps(found);
+}
+
+function resolveOverlaps(matches){
+  const byLength = [...matches].sort((a,b)=>(b.end-b.start)-(a.end-a.start) || b.weight-a.weight);
+  const kept = [];
+  for(const m of byLength) if(!kept.some(k => m.start < k.end && k.start < m.end)) kept.push(m);
+  return kept.sort((a,b)=>a.start-b.start);
+}
+
+function context(text, start){
+  const raw = text.slice(Math.max(0,start-32), start);
+  const before = raw.split(/[.!?;\n]/).pop().toLowerCase();
+  const toks = before.replace(/[^a-z'\s]/g,' ').split(/\s+/).filter(Boolean).slice(-3);
+  let mult = 1, negated = false, notes = [];
+  for(const t of toks){
+    if(INTENSIFIERS.includes(t)){ mult *= 1.5; notes.push('"'+t+'" x1.5'); }
+    if(DIMINISHERS.includes(t)) { mult *= 0.6; notes.push('"'+t+'" x0.6'); }
+    if(NEGATIONS.includes(t))   { negated = true; notes.push('negated by "'+t+'"'); }
+  }
+  return {mult:Math.min(mult,2.5), negated, notes};
+}
+
+function countPhrases(lower, list){
+  const hits = [];
+  for(const p of list){
+    const re = new RegExp('\\b'+escapeRe(p).replace(/\s+/g,'\\s+')+'\\b','gi');
+    const n = (lower.match(re)||[]).length;
+    for(let i=0;i<n;i++) hits.push(p);
+  }
+  return hits;
+}
+
+function detectCategory(lower){
+  let best = 'General', bestN = 0;
+  for(const cat in CATEGORIES){
+    const n = CATEGORIES[cat].filter(w => new RegExp('\\b'+escapeRe(w),'i').test(lower)).length;
+    if(n > bestN){ bestN = n; best = cat; }
+  }
+  return best;
+}
+
+/* ---------- 4. Naive Bayes classifier ---------- */
+
+const STOP = new Set('a an the and or but if is am are was were be been being i me my we our you your he she it they them this that these those to of in on at for with from by as so not no do does did have has had will would can could should there here what which who when how why about please kindly'.split(' '));
+
+function tokenize(t){
+  return t.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w => w.length > 1 && !STOP.has(w));
+}
+// Feature engineering. Raw word counts alone reach only about 41% on a corpus
+// this small, because train and test complaints barely share vocabulary. Adding
+// domain features derived from the rule lexicon lifts it to roughly 78%.
+// LEX_ features are repeated three times, a weighting chosen by grid search.
+function featurize(t){
+  const f = tokenize(t);
+  for(const m of findMatches(t, EMOTION_TERMS)) f.push('LEX_'+m.key, 'LEX_'+m.key, 'LEX_'+m.key);
+  for(const m of findMatches(t, URGENCY_TERMS)) f.push('URG_'+m.weight);
+  if(/!/.test(t)) f.push('STY_excl');
+  if(/\b[A-Z]{3,}\b/.test(t)) f.push('STY_caps');
+  if(/\?/.test(t)) f.push('STY_question');
+  return f;
+}
+
+function trainNB(docs, labelKey){
+  const classes = {}; const vocab = new Set();
+  for(const d of docs){
+    const c = d[labelKey];
+    if(!classes[c]) classes[c] = {count:0, total:0, words:Object.create(null)};
+    classes[c].count++;
+    for(const w of featurize(d.text)){
+      classes[c].words[w] = (classes[c].words[w]||0) + 1;
+      classes[c].total++;
+      vocab.add(w);
+    }
+  }
+  return {classes, V:vocab.size || 1, N:docs.length, vocab};
+}
+
+// Laplace (add-one) smoothing stops an unseen word from zeroing the whole product.
+// Logs are used because multiplying hundreds of small probabilities underflows.
+function predictNB(model, text){
+  // Words absent from training carry no information but, because class totals
+  // differ, they would tilt the result toward whichever class has fewest words.
+  const feats = featurize(text).filter(w => model.vocab.has(w));
+  const out = [];
+  for(const c in model.classes){
+    const cl = model.classes[c];
+    let lp = Math.log(cl.count / model.N);
+    for(const w of feats) lp += Math.log(((cl.words[w]||0) + 1) / (cl.total + model.V));
+    out.push({label:c, logp:lp});
+  }
+  out.sort((a,b)=>b.logp-a.logp);
+  const max = out[0].logp;
+  const exps = out.map(o => Math.exp(o.logp - max));
+  const sum = exps.reduce((a,b)=>a+b,0);
+  out.forEach((o,i)=>{ o.prob = exps[i]/sum; });
+  return out;
+}
+
+// Deterministic shuffle so the same seed always produces the same split.
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function shuffled(arr, seed){
+  const rnd = mulberry32(seed); const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j = Math.floor(rnd()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
+
+let MODEL = null;      // emotion classifier
+let MODEL_P = null;    // priority classifier
+let LAST_EVAL = null;
+
+function trainAll(seed, trainShare){
+  const data = shuffled(CORPUS, seed);
+  const cut = Math.floor(data.length * trainShare);
+  const train = data.slice(0, cut), test = data.slice(cut);
+  MODEL = trainNB(train, 'emotion');
+  MODEL_P = trainNB(train, 'priority');
+  return {train, test};
+}
+
+function evaluate(test){
+  const emoTrue = [], emoPred = [], emoRulePred = [];
+  const priTrue = [], priPred = [], priRulePred = [];
+  const errors = [];
+  for(const d of test){
+    const p = predictNB(MODEL, d.text)[0].label;
+    const pp = predictNB(MODEL_P, d.text)[0].label;
+    const r = analyze(d.text, {engine:'rules', skipML:true});
+    emoTrue.push(d.emotion); emoPred.push(p); emoRulePred.push(r.emotion);
+    priTrue.push(d.priority); priPred.push(pp); priRulePred.push(r.priority);
+    if(p !== d.emotion) errors.push({text:d.text, truth:d.emotion, pred:p, rule:r.emotion});
+  }
+  return {
+    emotion: metrics(emoTrue, emoPred, EMOTION_KEYS),
+    emotionRules: metrics(emoTrue, emoRulePred, EMOTION_KEYS),
+    priority: metrics(priTrue, priPred, ['P1','P2','P3','P4']),
+    priorityRules: metrics(priTrue, priRulePred, ['P1','P2','P3','P4']),
+    errors, n:test.length
+  };
+}
+
+// Accuracy as a function of training-set size, averaged over several splits.
+// A curve still rising at the right edge means more labelled data would help.
+function learningCurve(trainShare){
+  const fracs = [0.25, 0.5, 0.75, 1];
+  const seeds = [1, 7, 42, 99, 2024, 555];
+  return fracs.map(f => {
+    let tot = 0, cor = 0, size = 0;
+    for(const s of seeds){
+      const d = shuffled(CORPUS, s);
+      const cut = Math.floor(d.length * trainShare);
+      const tr = d.slice(0, cut).slice(0, Math.floor(cut * f));
+      const te = d.slice(cut);
+      size = tr.length;
+      const m = trainNB(tr, 'emotion');
+      for(const x of te){ tot++; if(predictNB(m, x.text)[0].label === x.emotion) cor++; }
+    }
+    return {n:size, acc: tot ? cor/tot : 0};
+  });
+}
+
+function metrics(truth, pred, labels){
+  const idx = Object.fromEntries(labels.map((l,i)=>[l,i]));
+  const cm = labels.map(()=>labels.map(()=>0));
+  let correct = 0;
+  for(let i=0;i<truth.length;i++){
+    if(!(truth[i] in idx) || !(pred[i] in idx)) continue;
+    cm[idx[truth[i]]][idx[pred[i]]]++;
+    if(truth[i] === pred[i]) correct++;
+  }
+  const per = labels.map((l,i)=>{
+    const tp = cm[i][i];
+    const fp = cm.reduce((s,row,r)=> s + (r===i?0:row[i]), 0);
+    const fn = cm[i].reduce((s,v,c)=> s + (c===i?0:v), 0);
+    const support = cm[i].reduce((a,b)=>a+b,0);
+    const prec = tp+fp ? tp/(tp+fp) : 0;
+    const rec  = tp+fn ? tp/(tp+fn) : 0;
+    const f1   = prec+rec ? 2*prec*rec/(prec+rec) : 0;
+    return {label:l, precision:prec, recall:rec, f1, support};
+  });
+  const withSupport = per.filter(p=>p.support>0);
+  const macroF1 = withSupport.length ? withSupport.reduce((s,p)=>s+p.f1,0)/withSupport.length : 0;
+  return {cm, labels, accuracy: truth.length ? correct/truth.length : 0, per, macroF1};
+}
+
+// Words most characteristic of each class, by log ratio against all other classes.
+function topFeatures(model, label, k){
+  const cl = model.classes[label];
+  if(!cl) return [];
+  const others = Object.keys(model.classes).filter(c=>c!==label);
+  const scores = [];
+  for(const w in cl.words){
+    if(cl.words[w] < 2 || w.includes('_')) continue;
+    const pIn = (cl.words[w]+1)/(cl.total+model.V);
+    let pOut = 0;
+    for(const c of others){ const o = model.classes[c]; pOut += ((o.words[w]||0)+1)/(o.total+model.V); }
+    pOut /= Math.max(others.length,1);
+    scores.push({w, s:Math.log(pIn/pOut)});
+  }
+  return scores.sort((a,b)=>b.s-a.s).slice(0,k);
+}
+
+/* ---------- 5. The analyzer ---------- */
+
+function analyze(rawText, opts){
+  opts = opts || {};
+  const norm = normalizeSpelling(rawText.trim());
+  const text = norm.text;
+  const lower = text.toLowerCase();
+
+  /* 5a. Rule-based emotion scoring */
+  const scores = {anger:0, frustration:0, disappointment:0, anxiety:0, satisfaction:0};
+  const emoMatches = findMatches(text, EMOTION_TERMS);
+  const emoRows = [];
+  for(const m of emoMatches){
+    const ctx = context(text, m.start);
+    let w = m.weight * ctx.mult, applied = m.key;
+    if(ctx.negated){
+      if(m.key === 'satisfaction'){ applied = 'disappointment'; w *= 0.9; }
+      else w *= 0.4;
+    }
+    scores[applied] += w;
+    m.applied = applied;
+    emoRows.push({surface:m.surface, applied, points:w, notes:ctx.notes});
+  }
+
+  /* 5b. Writing style */
+  const excl = Math.min((text.match(/!/g)||[]).length, CFG.exclamationCapCount);
+  const capsRaw = (text.match(/\b[A-Z]{3,}\b/g)||[]).filter(w => !['GST','EMI','OTP','ATM','AC','RBI'].includes(w)).length;
+  const caps = Math.min(capsRaw, CFG.capsCapCount);
+  if(excl) scores.anger += excl * 0.6;
+  if(caps) scores.anger += caps * 0.8;
+
+  /* 5c. Rule emotion and intensity */
+  const negativeSum = scores.anger + scores.frustration + scores.disappointment + scores.anxiety;
+  let ruleEmotion = 'neutral', best = 0;
+  for(const k in scores) if(scores[k] > best){ best = scores[k]; ruleEmotion = k; }
+  if(best < 1) ruleEmotion = 'neutral';
+  const intensity = Math.round(100 * (1 - Math.exp(-negativeSum/9)));
+
+  /* 5d. Model prediction and the hybrid decision */
+  let mlRanked = null, mlEmotion = null, mlConf = 0;
+  if(MODEL && !opts.skipML){
+    mlRanked = predictNB(MODEL, text);
+    mlEmotion = mlRanked[0].label;
+    mlConf = mlRanked[0].prob;
+  }
+  const engine = opts.engine || 'hybrid';
+  let emotion, decidedBy;
+  if(engine === 'rules' || !mlEmotion){ emotion = ruleEmotion; decidedBy = 'rule engine'; }
+  else if(engine === 'ml'){ emotion = mlEmotion; decidedBy = 'model'; }
+  else if(mlConf >= CFG.mlConfidenceFloor){ emotion = mlEmotion; decidedBy = 'model, confidence ' + (mlConf*100).toFixed(0) + '%'; }
+  else if(ruleEmotion !== 'neutral'){ emotion = ruleEmotion; decidedBy = 'rule engine, model unconfident'; }
+  else { emotion = mlEmotion; decidedBy = 'model, low confidence'; }
+
+  /* 5e. Urgency */
+  const urgMatches = findMatches(text, URGENCY_TERMS);
+  const urgRows = [];
+  let u = CFG.urgencyBase;
+  for(const m of urgMatches){
+    const ctx = context(text, m.start);
+    let pts = m.weight * ctx.mult * CFG.keywordGain;
+    if(ctx.negated) pts *= 0.5;
+    u += pts;
+    urgRows.push({surface:m.surface, weight:m.weight, points:pts, notes:ctx.notes});
+  }
+  const deHits = countPhrases(lower, DE_ESCALATORS);
+  const threatHits = countPhrases(lower, THREATS);
+  const hazardHits = countPhrases(lower, HAZARD_TERMS);
+  const dePenalty = Math.min(deHits.length * CFG.deEscalatorPenalty, CFG.deEscalatorCap);
+  const threatAdd = Math.min(threatHits.length * CFG.threatBonus, CFG.threatCap);
+  const styleAdd = excl*CFG.exclamationGain + caps*CFG.capsGain;
+  const emoAdd = CFG.intensityGain * intensity * (emotion === 'satisfaction' || emotion === 'neutral' ? 0.4 : 1);
+
+  u = u - dePenalty + threatAdd + styleAdd + emoAdd;
+  if(emotion === 'satisfaction' && negativeSum < 2) u *= 0.5;
+  let overridden = false;
+  if(hazardHits.length && u < CFG.criticalFloor){ u = CFG.criticalFloor; overridden = true; }
+  const urgency = Math.max(0, Math.min(100, Math.round(u)));
+
+  const priority = urgency >= CFG.thresholds.P1 ? 'P1'
+                 : urgency >= CFG.thresholds.P2 ? 'P2'
+                 : urgency >= CFG.thresholds.P3 ? 'P3' : 'P4';
+
+  /* 5f. Routing, deadline, conflict flags */
+  const category = detectCategory(lower);
+  const due = new Date(Date.now() + SLA_HOURS[priority]*3600*1000);
+  const conflicts = [];
+  if(scores.satisfaction > 1.5 && negativeSum > 3)
+    conflicts.push('Positive and negative wording appear together. This can indicate sarcasm or a mixed complaint — worth a human read.');
+  if(mlEmotion && ruleEmotion !== 'neutral' && mlEmotion !== ruleEmotion)
+    conflicts.push('The model predicted ' + EMOTION_META[mlEmotion].label.toLowerCase() + ' while the rules predicted ' + EMOTION_META[ruleEmotion].label.toLowerCase() + '.');
+  if(emoMatches.length + urgMatches.length === 0)
+    conflicts.push('No lexicon terms matched, so the rule engine contributed nothing to this result.');
+
+  return {
+    rawText, text, spellingFixes:norm.fixes,
+    emotion, emotionLabel:EMOTION_META[emotion].label, decidedBy,
+    ruleEmotion, mlEmotion, mlConf, mlRanked,
+    scores, intensity, urgency, priority, category,
+    bandName:{P1:'Critical',P2:'High',P3:'Medium',P4:'Low'}[priority],
+    sla:SLA_TEXT[priority], due,
+    emoMatches, urgMatches, emoRows, urgRows, conflicts,
+    modifiers:{exclamations:excl, capsWords:caps, deEscalators:deHits, threats:threatHits,
+               hazards:hazardHits, dePenalty, threatAdd, styleAdd, overridden,
+               emoAdd:Math.round(emoAdd*10)/10}
+  };
+}
+
+/* ---------- 6. Reply drafting ---------- */
+
+const OPENERS = {
+  anger:'I am sorry — this should not have happened, and I understand why you are angry.',
+  frustration:'I am sorry you have had to follow up repeatedly. That is on us, not on you.',
+  disappointment:'I am sorry we fell short of what you expected from us.',
+  anxiety:'Thank you for flagging this. I understand this is worrying and we are treating it as urgent.',
+  satisfaction:'Thank you for taking the time to share this — it is good to hear.',
+  neutral:'Thank you for getting in touch.'
+};
+const ACTIONS = {
+  P1:'I have escalated this to our priority team and someone will contact you within the hour.',
+  P2:'I have raised this with the relevant team and you will hear from us before the end of the day.',
+  P3:'I have logged this and our team will come back to you within two working days.',
+  P4:'I have recorded this and we will respond in the usual course.'
+};
+function draftReply(r){
+  const lines = [OPENERS[r.emotion]];
+  if(r.category !== 'General') lines.push('I have routed this to our ' + r.category.toLowerCase() + ' team.');
+  lines.push(ACTIONS[r.priority]);
+  if(r.modifiers.overridden) lines.push('Because this involves a possible safety issue, please stop using the equipment until it has been checked.');
+  if(r.emotion !== 'satisfaction') lines.push('Your reference for this is ' + r.priority + '-' + Math.floor(Math.random()*90000+10000) + '.');
+  lines.push('Thank you for your patience.');
+  return lines.join('\n\n');
+}
+
+/* ---------- 7. Rendering ---------- */
+
+function renderEvidence(r){
+  const spans = [];
+  r.emoMatches.forEach(m => spans.push({...m, cls:'e-'+EMOTION_META[m.applied].cls, rank:2}));
+  r.urgMatches.forEach(m => spans.push({...m, cls:'u-hit', rank:1}));
+  const chosen = [];
+  spans.sort((a,b)=> b.rank-a.rank || (b.end-b.start)-(a.end-a.start));
+  for(const s of spans) if(!chosen.some(k => s.start < k.end && k.start < s.end)) chosen.push(s);
+  chosen.sort((a,b)=>a.start-b.start);
+  let html = '', cur = 0;
+  for(const s of chosen){
+    html += escapeHtml(r.text.slice(cur, s.start));
+    html += '<mark class="'+s.cls+'">'+escapeHtml(r.text.slice(s.start, s.end))+'</mark>';
+    cur = s.end;
+  }
+  html += escapeHtml(r.text.slice(cur));
+  return html.replace(/\n/g,'<br>');
+}
+
+function bar(label, value, max, color, display){
+  const pct = max > 0 ? Math.max(0, Math.min(100, value/max*100)) : 0;
+  return '<div class="bar"><span>'+escapeHtml(label)+'</span>'+
+         '<span class="t"><i style="width:'+pct.toFixed(1)+'%;background:'+color+'"></i></span>'+
+         '<span class="v">'+escapeHtml(display)+'</span></div>';
+}
+
+let lastResult = null;
+
+function showResult(r){
+  lastResult = r;
+  document.getElementById('resultHint').hidden = true;
+  document.getElementById('resultBody').hidden = false;
+
+  let flags = '';
+  if(r.modifiers.overridden) flags += '<div class="flag crit"><b>Safety override applied.</b> Hazard wording detected ('+escapeHtml(r.modifiers.hazards.join(', '))+'), so urgency was raised to the critical floor regardless of tone.</div>';
+  r.conflicts.forEach(c => flags += '<div class="flag">'+escapeHtml(c)+'</div>');
+  if(r.spellingFixes.length) flags += '<div class="flag">Spelling normalised: '+escapeHtml(r.spellingFixes.join(', '))+'</div>';
+  document.getElementById('flags').innerHTML = flags;
+
+  document.getElementById('uScore').textContent = r.urgency;
+  const band = document.getElementById('uBand');
+  band.textContent = r.priority + ' ' + r.bandName;
+  band.style.color = 'var(--'+r.priority.toLowerCase()+')';
+  document.getElementById('needle').style.left = r.urgency + '%';
+
+  const fe = document.getElementById('fEmotion');
+  fe.textContent = r.emotionLabel;
+  fe.style.color = 'var(--'+EMOTION_META[r.emotion].cls+')';
+  fe.title = 'Decided by ' + r.decidedBy;
+  document.getElementById('fIntensity').textContent = r.intensity + ' / 100';
+  document.getElementById('fCategory').textContent = r.category;
+  document.getElementById('fSla').textContent = r.sla;
+
+  // Emotion profile: model probabilities when available, rule scores otherwise
+  let barsHtml = '';
+  if(r.mlRanked){
+    const byLabel = Object.fromEntries(r.mlRanked.map(o=>[o.label,o.prob]));
+    EMOTION_KEYS.forEach(k => {
+      barsHtml += bar(EMOTION_META[k].label, byLabel[k]||0, 1, 'var(--'+EMOTION_META[k].cls+')', ((byLabel[k]||0)*100).toFixed(0)+'%');
+    });
+    barsHtml += '<p class="hint" style="margin:8px 0 0">Model probabilities. Final label decided by the '+escapeHtml(r.decidedBy)+'.</p>';
+  } else {
+    const max = Math.max(1, ...Object.values(r.scores));
+    EMOTION_KEYS.filter(k=>k!=='neutral').forEach(k => {
+      barsHtml += bar(EMOTION_META[k].label, r.scores[k], max, 'var(--'+EMOTION_META[k].cls+')', r.scores[k].toFixed(1));
+    });
+    barsHtml += '<p class="hint" style="margin:8px 0 0">Rule engine points. Train the model for probability estimates.</p>';
+  }
+  document.getElementById('emoBars').innerHTML = barsHtml;
+
+  document.getElementById('evidence').innerHTML = renderEvidence(r);
+  const used = new Set(r.emoMatches.map(m=>m.applied));
+  let leg = [...used].map(k => '<span><i style="background:var(--'+EMOTION_META[k].cls+')"></i>'+EMOTION_META[k].label+'</span>').join('');
+  if(r.urgMatches.length) leg += '<span><i style="background:var(--muted)"></i>Urgency keyword</span>';
+  document.getElementById('legend').innerHTML = leg || '<span>No signal words found.</span>';
+
+  document.getElementById('reply').value = draftReply(r);
+
+  // Signal tables
+  const et = document.getElementById('emoTable');
+  document.getElementById('emoEmpty').classList.toggle('hide', r.emoRows.length > 0);
+  et.innerHTML = r.emoRows.length ? '<tr><th>Matched</th><th>Counted as</th><th class="num">Points</th></tr>' +
+    r.emoRows.slice().sort((a,b)=>b.points-a.points).map(row =>
+      '<tr><td>'+escapeHtml(row.surface)+(row.notes.length?'<br><span class="tag">'+escapeHtml(row.notes.join(', '))+'</span>':'')+
+      '</td><td style="color:var(--'+EMOTION_META[row.applied].cls+')">'+EMOTION_META[row.applied].label+
+      '</td><td class="num">'+row.points.toFixed(1)+'</td></tr>').join('') : '';
+
+  const mods = [];
+  if(r.modifiers.overridden) mods.push(['Safety override to floor '+CFG.criticalFloor, 'set '+r.urgency]);
+  if(r.modifiers.exclamations) mods.push(['Exclamation marks x'+r.modifiers.exclamations, '+'+(r.modifiers.exclamations*CFG.exclamationGain).toFixed(1)]);
+  if(r.modifiers.capsWords) mods.push(['Capitalised words x'+r.modifiers.capsWords, '+'+(r.modifiers.capsWords*CFG.capsGain).toFixed(1)]);
+  if(r.modifiers.threats.length) mods.push(['Escalation threat: '+r.modifiers.threats.join(', '), '+'+r.modifiers.threatAdd.toFixed(1)]);
+  if(r.modifiers.deEscalators.length) mods.push(['Can wait: '+r.modifiers.deEscalators.join(', '), '-'+r.modifiers.dePenalty.toFixed(1)]);
+  mods.push(['Carried from emotional intensity', '+'+r.modifiers.emoAdd.toFixed(1)]);
+  mods.push(['Baseline', '+'+CFG.urgencyBase.toFixed(1)]);
+  document.getElementById('urgTable').innerHTML = '<tr><th>Signal</th><th class="num">Wt</th><th class="num">Points</th></tr>' +
+    r.urgRows.slice().sort((a,b)=>b.points-a.points).map(row =>
+      '<tr><td>'+escapeHtml(row.surface)+'</td><td class="num">'+row.weight+'</td><td class="num">+'+row.points.toFixed(1)+'</td></tr>').join('') +
+    mods.map(m => '<tr><td>'+escapeHtml(m[0])+'</td><td class="num">—</td><td class="num">'+escapeHtml(m[1])+'</td></tr>').join('');
+
+  document.getElementById('jsonOut').textContent = JSON.stringify(apiShape(r), null, 2);
+}
+
+function apiShape(r){
+  return {
+    complaint: r.text,
+    emotion: r.emotion,
+    emotion_decided_by: r.decidedBy,
+    model_probabilities: r.mlRanked ? Object.fromEntries(r.mlRanked.map(o=>[o.label, +o.prob.toFixed(3)])) : null,
+    rule_emotion: r.ruleEmotion,
+    emotional_intensity: r.intensity,
+    urgency_score: r.urgency,
+    priority: r.priority,
+    category: r.category,
+    respond_by: r.due.toISOString(),
+    safety_override: r.modifiers.overridden,
+    flags: r.conflicts,
+    matched_terms: {emotion: r.emoRows.map(x=>x.surface), urgency: r.urgRows.map(x=>x.surface)}
+  };
+}
+
+/* ---------- 8. Queue ---------- */
+
+let queue = [];
+let nextId = 1;
+
+function addToQueue(r){
+  queue.push({
+    id: nextId++, text: r.text, emotion: r.emotion, emotionLabel: r.emotionLabel,
+    urgency: r.urgency, priority: r.priority, category: r.category,
+    due: r.due.getTime(), status: 'open'
+  });
+  queue.sort((a,b)=>b.urgency-a.urgency);
+  saveState(); renderQueue(); renderInsights();
+}
+
+function filteredQueue(){
+  const p = document.getElementById('fPriority').value;
+  const e = document.getElementById('fEmotionSel').value;
+  const c = document.getElementById('fCategorySel').value;
+  const s = document.getElementById('fStatus').value;
+  const q = document.getElementById('fSearch').value.toLowerCase();
+  return queue.filter(r =>
+    (!p || r.priority === p) && (!e || r.emotion === e) &&
+    (!c || r.category === c) && (!s || r.status === s) &&
+    (!q || r.text.toLowerCase().includes(q)));
+}
+
+function renderQueue(){
+  const rows = filteredQueue();
+  document.getElementById('qEmpty').classList.toggle('hide', queue.length > 0);
+  document.getElementById('qBody').innerHTML = rows.map(r => {
+    const snip = r.text.length > 110 ? r.text.slice(0,110).trim()+'…' : r.text;
+    const d = new Date(r.due);
+    const late = r.status === 'open' && d.getTime() < Date.now();
+    return '<tr class="'+(r.status==='resolved'?'done':'')+'">'+
+      '<td><span class="pill '+r.priority+'">'+r.priority+'</span></td>'+
+      '<td class="num">'+r.urgency+'</td>'+
+      '<td style="color:var(--'+EMOTION_META[r.emotion].cls+')">'+r.emotionLabel+'</td>'+
+      '<td><span class="tag">'+escapeHtml(r.category)+'</span></td>'+
+      '<td>'+escapeHtml(snip)+'</td>'+
+      '<td class="num" style="color:'+(late?'var(--p1)':'var(--muted)')+'">'+d.toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</td>'+
+      '<td><button class="act ghost sm" data-toggle="'+r.id+'">'+(r.status==='open'?'Resolve':'Reopen')+'</button></td></tr>';
+  }).join('');
+  document.querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => {
+    const it = queue.find(x => x.id === +b.dataset.toggle);
+    it.status = it.status === 'open' ? 'resolved' : 'open';
+    saveState(); renderQueue(); renderInsights();
+  });
+}
+
+function renderInsights(){
+  const n = queue.length;
+  document.getElementById('kTotal').textContent = n;
+  document.getElementById('kCritical').textContent = queue.filter(r=>r.priority==='P1' && r.status==='open').length;
+  document.getElementById('kAvg').textContent = n ? Math.round(queue.reduce((s,r)=>s+r.urgency,0)/n) : 0;
+  const neg = queue.filter(r => !['satisfaction','neutral'].includes(r.emotion)).length;
+  document.getElementById('kNeg').textContent = n ? Math.round(neg/n*100)+'%' : '0%';
+
+  const countBy = key => queue.reduce((m,r)=>{ m[r[key]] = (m[r[key]]||0)+1; return m; }, {});
+  const emo = countBy('emotion'), pri = countBy('priority'), cat = countBy('category');
+
+  const maxE = Math.max(1, ...Object.values(emo));
+  document.getElementById('chartEmotion').innerHTML = EMOTION_KEYS
+    .map(k => bar(EMOTION_META[k].label, emo[k]||0, maxE, 'var(--'+EMOTION_META[k].cls+')', String(emo[k]||0))).join('');
+
+  const maxP = Math.max(1, ...Object.values(pri));
+  document.getElementById('chartPriority').innerHTML = ['P1','P2','P3','P4']
+    .map(k => bar(k, pri[k]||0, maxP, 'var(--'+k.toLowerCase()+')', String(pri[k]||0))).join('');
+
+  const cats = Object.keys(cat).sort((a,b)=>cat[b]-cat[a]);
+  const maxC = Math.max(1, ...Object.values(cat));
+  document.getElementById('chartCategory').innerHTML = cats.length
+    ? cats.map(k => bar(k, cat[k], maxC, 'var(--ink)', String(cat[k]))).join('')
+    : '<p class="hint">No data yet.</p>';
+
+  document.getElementById('chartCatUrg').innerHTML = cats.length
+    ? cats.map(k => {
+        const items = queue.filter(r=>r.category===k);
+        const avg = Math.round(items.reduce((s,r)=>s+r.urgency,0)/items.length);
+        return bar(k, avg, 100, 'var(--p2)', String(avg));
+      }).join('')
+    : '<p class="hint">No data yet.</p>';
+}
+
+function exportCsv(){
+  const head = ['id','priority','urgency','emotion','category','status','respond_by','complaint'];
+  const rows = queue.map(r => [r.id, r.priority, r.urgency, r.emotion, r.category, r.status,
+    new Date(r.due).toISOString(), '"'+r.text.replace(/"/g,'""')+'"'].join(','));
+  download('triage-queue.csv', head.join(',')+'\n'+rows.join('\n'));
+}
+function download(name, content){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], {type:'text/csv'}));
+  a.download = name; a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* ---------- 9. Persistence (degrades silently if unavailable) ---------- */
+
+function saveState(){
+  try{
+    localStorage.setItem('cea_queue', JSON.stringify(queue));
+    localStorage.setItem('cea_corpus', JSON.stringify(CORPUS.filter(c=>c.source==='user')));
+  }catch(e){ /* storage unavailable — in-memory only */ }
+}
+function loadState(){
+  try{
+    const q = JSON.parse(localStorage.getItem('cea_queue')||'[]');
+    if(Array.isArray(q) && q.length){ queue = q; nextId = Math.max(...q.map(x=>x.id))+1; }
+    const c = JSON.parse(localStorage.getItem('cea_corpus')||'[]');
+    if(Array.isArray(c) && c.length) CORPUS = BASE_CORPUS.concat(c);
+  }catch(e){ /* ignore */ }
+}
+
+/* ---------- 10. Model tab ---------- */
+
+function renderModelTab(){
+  const seed = parseInt(document.getElementById('seedIn').value,10) || 42;
+  const share = parseFloat(document.getElementById('splitSel').value);
+  const {train, test} = trainAll(seed, share);
+  const ev = evaluate(test);
+  LAST_EVAL = ev;
+  document.getElementById('modelOut').classList.remove('hide');
+
+  const pct = x => (x*100).toFixed(1) + '%';
+  document.getElementById('mAccE').textContent = pct(ev.emotion.accuracy);
+  document.getElementById('mAccR').textContent = pct(ev.emotionRules.accuracy);
+  document.getElementById('mAccP').textContent = pct(ev.priority.accuracy);
+  document.getElementById('mAccPR').textContent = pct(ev.priorityRules.accuracy);
+
+  // Confusion matrix
+  const m = ev.emotion;
+  let cm = '<tr><th></th>' + m.labels.map(l=>'<th>'+EMOTION_META[l].label.slice(0,4)+'</th>').join('') + '</tr>';
+  m.cm.forEach((row,i) => {
+    cm += '<tr><th class="rowh">'+EMOTION_META[m.labels[i]].label+'</th>' +
+      row.map((v,j) => '<td class="'+(i===j&&v?'diag':(v?'err':''))+'">'+v+'</td>').join('') + '</tr>';
+  });
+  document.getElementById('cmE').innerHTML = cm;
+
+  let prf = '<tr><th>Class</th><th class="num">Prec</th><th class="num">Rec</th><th class="num">F1</th><th class="num">n</th></tr>';
+  m.per.forEach(p => {
+    prf += '<tr><td style="color:var(--'+EMOTION_META[p.label].cls+')">'+EMOTION_META[p.label].label+'</td>'+
+      '<td class="num">'+p.precision.toFixed(2)+'</td><td class="num">'+p.recall.toFixed(2)+'</td>'+
+      '<td class="num">'+p.f1.toFixed(2)+'</td><td class="num">'+p.support+'</td></tr>';
+  });
+  prf += '<tr><td><b>Macro F1</b></td><td class="num">—</td><td class="num">—</td><td class="num"><b>'+m.macroF1.toFixed(2)+'</b></td><td class="num">'+ev.n+'</td></tr>';
+  document.getElementById('prfE').innerHTML = prf;
+
+  const curve = learningCurve(share);
+  document.getElementById('curveChart').innerHTML = curve
+    .map(p => bar(p.n + ' examples', p.acc, 1, 'var(--p3)', (p.acc*100).toFixed(1)+'%')).join('');
+  const gain = (curve[curve.length-1].acc - curve[curve.length-2].acc) * 100;
+  document.getElementById('curveNote').textContent = gain > 1.5
+    ? 'Accuracy is still rising at the largest training size, so collecting more labelled complaints is the highest-value next step.'
+    : 'The curve has begun to flatten. Further gains are more likely to come from better features or a stronger model than from more of the same data.';
+
+  let ft = '<tr><th>Emotion</th><th>Top features</th></tr>';
+  EMOTION_KEYS.forEach(k => {
+    const f = topFeatures(MODEL, k, 8);
+    ft += '<tr><td style="color:var(--'+EMOTION_META[k].cls+')">'+EMOTION_META[k].label+'</td><td>'+
+      (f.length ? f.map(x=>'<span class="tag">'+escapeHtml(x.w)+'</span>').join(' ') : '<span class="hint">too few examples</span>')+'</td></tr>';
+  });
+  document.getElementById('featTable').innerHTML = ft;
+
+  let er = '<tr><th>Complaint</th><th>True</th><th>Model</th><th>Rules</th></tr>';
+  er += ev.errors.length ? ev.errors.map(e =>
+    '<tr><td>'+escapeHtml(e.text.slice(0,90))+'</td><td>'+EMOTION_META[e.truth].label+'</td>'+
+    '<td style="color:var(--p1)">'+EMOTION_META[e.pred].label+'</td><td>'+EMOTION_META[e.rule].label+'</td></tr>').join('')
+    : '<tr><td colspan="4" class="hint">No misclassifications on this split.</td></tr>';
+  document.getElementById('errTable').innerHTML = er;
+
+  toast('Trained on '+train.length+', tested on '+test.length+'.');
+}
+
+/* ---------- 11. Dataset tab ---------- */
+
+function renderCorpus(){
+  const f = document.getElementById('dFilterEmotion').value;
+  const q = document.getElementById('dSearch').value.toLowerCase();
+  const rows = CORPUS.filter(c => (!f || c.emotion===f) && (!q || c.text.toLowerCase().includes(q)));
+  document.getElementById('corpusCount').textContent = rows.length + ' of ' + CORPUS.length + ' shown';
+  document.getElementById('corpusBody').innerHTML = rows.map((c,i) =>
+    '<tr><td class="num">'+(i+1)+'</td><td>'+escapeHtml(c.text)+'</td>'+
+    '<td style="color:var(--'+EMOTION_META[c.emotion].cls+')">'+EMOTION_META[c.emotion].label+'</td>'+
+    '<td><span class="pill '+c.priority+'">'+c.priority+'</span></td></tr>').join('');
+
+  const counts = CORPUS.reduce((m,c)=>{ m[c.emotion]=(m[c.emotion]||0)+1; return m; },{});
+  const max = Math.max(1, ...Object.values(counts));
+  document.getElementById('corpusBars').innerHTML = EMOTION_KEYS
+    .map(k => bar(EMOTION_META[k].label, counts[k]||0, max, 'var(--'+EMOTION_META[k].cls+')', String(counts[k]||0))).join('');
+}
+
+/* ---------- 12. Wiring ---------- */
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('section[id^=tab-]').forEach(s =>
+    s.classList.toggle('hide', s.id !== 'tab-' + b.dataset.tab));
+  if(b.dataset.tab === 'insights') renderInsights();
+  if(b.dataset.tab === 'data') renderCorpus();
+});
+
+const SAMPLES = [
+  ['Repeat follow-up','My order was supposed to arrive on Monday. It is Thursday now and there is still no update. This is the third time I am writing about this and nobody has bothered to reply. Extremely disappointed with the service.'],
+  ['Money debited twice','URGENT!! My account has been debited twice for the same transaction of Rs 24,500 and the amount has not been refunded. I need this resolved immediately, I have an EMI due tomorrow.'],
+  ['Calm safety report','Could you please check the gas leak in flat 4B whenever convenient? No rush. Thank you for your help.'],
+  ['Escalation threat','I have been trying to reach customer care for four days. Every time I call the line disconnects. I am really frustrated and if this is not sorted by tomorrow I will file a complaint in consumer court.'],
+  ['Possible sarcasm','Thanks a lot for wasting my entire day. Excellent work as always, truly outstanding service.'],
+  ['Hinglish complaint','Mujhe abhi tak refund nahi mila, bohot pareshan hoon. Bar bar call kar raha hoon par koi sunwai nahi hoti.'],
+  ['Low-priority query','Hi team, the invoice for last month has a small mismatch in the GST amount. No rush, please check whenever you get time. Thanks for all the help so far.'],
+  ['Positive feedback','Thanks for resolving my broadband issue so quickly. The engineer was polite and the connection is stable now. I appreciate the follow up.']
+];
+const sl = document.getElementById('sampleList');
+SAMPLES.forEach(s => {
+  const b = document.createElement('button');
+  b.className = 'chip';
+  b.innerHTML = '<b>'+escapeHtml(s[0])+'</b> — '+escapeHtml(s[1].slice(0,66))+'…';
+  b.onclick = () => { document.getElementById('input').value = s[1]; runAnalyze(); };
+  sl.appendChild(b);
+});
+
+function runAnalyze(){
+  const v = document.getElementById('input').value.trim();
+  if(!v){ toast('Enter a complaint first.'); return null; }
+  const r = analyze(v, {engine: document.getElementById('engine').value});
+  showResult(r);
+  return r;
+}
+
+document.getElementById('analyze').onclick = runAnalyze;
+document.getElementById('queueBtn').onclick = () => { const r = runAnalyze(); if(r){ addToQueue(r); toast('Added as '+r.priority+'.'); } };
+document.getElementById('clear').onclick = () => {
+  document.getElementById('input').value = '';
+  document.getElementById('resultBody').hidden = true;
+  document.getElementById('resultHint').hidden = false;
+  document.getElementById('input').focus();
+};
+document.getElementById('engine').onchange = () => { if(lastResult) runAnalyze(); };
+document.getElementById('input').addEventListener('keydown', e => {
+  if((e.metaKey||e.ctrlKey) && e.key === 'Enter') runAnalyze();
+});
+document.getElementById('bulkRun').onclick = () => {
+  const lines = document.getElementById('bulk').value.split('\n').map(s=>s.trim()).filter(s=>s.length>3);
+  if(!lines.length){ toast('Paste some complaints first.'); return; }
+  const eng = document.getElementById('engine').value;
+  lines.forEach(l => addToQueue(analyze(l, {engine:eng})));
+  document.getElementById('bulk').value = '';
+  toast(lines.length + ' complaints processed.');
+};
+document.getElementById('copyReply').onclick = () => {
+  navigator.clipboard?.writeText(document.getElementById('reply').value)
+    .then(()=>toast('Reply copied.'), ()=>toast('Copy blocked by the browser.'));
+};
+document.getElementById('copyJson').onclick = () => {
+  navigator.clipboard?.writeText(document.getElementById('jsonOut').textContent)
+    .then(()=>toast('JSON copied.'), ()=>toast('Copy blocked by the browser.'));
+};
+
+['fPriority','fEmotionSel','fCategorySel','fStatus','fSearch'].forEach(id =>
+  document.getElementById(id).addEventListener('input', renderQueue));
+document.getElementById('exportCsv').onclick = exportCsv;
+document.getElementById('clearQueue').onclick = () => { queue = []; saveState(); renderQueue(); renderInsights(); };
+
+document.getElementById('trainBtn').onclick = renderModelTab;
+
+document.getElementById('addLabelled').onclick = () => {
+  const t = document.getElementById('newText').value.trim();
+  if(t.length < 10){ toast('Enter a complaint of at least ten characters.'); return; }
+  CORPUS.push({id:CORPUS.length+1, text:t, emotion:document.getElementById('newEmotion').value,
+               priority:document.getElementById('newPriority').value, source:'user'});
+  document.getElementById('newText').value = '';
+  saveState(); renderCorpus();
+  toast('Added. Retrain the model to use it.');
+};
+document.getElementById('exportCorpus').onclick = () => {
+  const head = 'id,emotion,priority,source,text';
+  const rows = CORPUS.map(c => [c.id, c.emotion, c.priority, c.source, '"'+c.text.replace(/"/g,'""')+'"'].join(','));
+  download('labelled-corpus.csv', head+'\n'+rows.join('\n'));
+};
+['dFilterEmotion','dSearch'].forEach(id =>
+  document.getElementById(id).addEventListener('input', renderCorpus));
+
+/* ---------- 13. Startup ---------- */
+
+EMOTION_KEYS.forEach(k => {
+  ['fEmotionSel','dFilterEmotion'].forEach(id => {
+    const o = document.createElement('option'); o.value = k; o.textContent = EMOTION_META[k].label;
+    document.getElementById(id).appendChild(o);
+  });
+  const o2 = document.createElement('option'); o2.value = k; o2.textContent = EMOTION_META[k].label;
+  document.getElementById('newEmotion').appendChild(o2);
+});
+Object.keys(CATEGORIES).concat('General').forEach(c => {
+  const o = document.createElement('option'); o.value = c; o.textContent = c;
+  document.getElementById('fCategorySel').appendChild(o);
+});
+
+loadState();
+trainAll(42, 0.75);          // train once at startup so the Analyze tab has a model
+renderQueue(); renderInsights(); renderCorpus();
+</script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+text,emotion,priority,n_tokens
+This is completely unacceptable. I have been charged twice and nobody is answering.,anger,P2,13
+Your delivery agent was extremely rude to my mother. I want an apology.,anger,P2,13
+Worst service I have ever seen. You people are cheating customers openly.,anger,P3,12
+I am furious. The product arrived broken and your team is blaming me for it.,anger,P2,15
+This is daylight robbery. You charged 2000 rupees extra without informing me.,anger,P2,12
+Absolutely pathetic experience. Three months and the issue is still not fixed.,anger,P2,12
+Your executive hung up on me. That is disgusting behaviour.,anger,P3,10
+I am being harassed by your recovery agents every single day. Stop this.,anger,P1,13
+Shameful. You took my money and delivered an empty box.,anger,P1,10
+Ridiculous policy. Why should I pay for your mistake?,anger,P3,9
+I am sick of your false promises. Every week there is a new excuse.,anger,P2,14
+The technician came drunk to my house. This is outrageous.,anger,P1,10
+You people are frauds. My subscription renewed without my consent.,anger,P2,10
+Totally useless app. It crashes every time I try to make a payment.,anger,P3,13
+How dare you deduct money from my account without permission.,anger,P1,10
+I will file a complaint in consumer court if this is not resolved by tomorrow.,anger,P2,15
+If I do not get a response today I am going to post all of this on social media.,anger,P2,19
+Food poisoning after eating from your outlet. I had to visit the hospital.,anger,P1,13
+"Bahut kharab service hai, koi sunwai nahi hoti.",anger,P3,8
+Your staff lied to me on the phone. This is unacceptable behaviour.,anger,P2,12
+I have called customer care six times this week and the issue is still open.,frustration,P2,15
+Still waiting for my refund. It has been twenty days now.,frustration,P2,11
+This is the third time I am raising this ticket. No one responds.,frustration,P2,13
+Every time I call I am told someone will call back. Nobody ever does.,frustration,P2,14
+My complaint number is 44512 and there has been no update for two weeks.,frustration,P3,14
+I keep getting transferred between departments and nobody takes ownership.,frustration,P3,10
+The same error is coming again and again even after reinstalling the app.,frustration,P3,13
+I have shared the documents four times already. Please stop asking again.,frustration,P3,12
+Internet keeps disconnecting every hour. The engineer visited twice with no solution.,frustration,P2,12
+Bar bar call kar raha hoon par koi response nahi mil raha.,frustration,P2,12
+Order status has been showing out for delivery since Monday.,frustration,P3,10
+Why is it so difficult to get a simple address change done?,frustration,P3,12
+No reply to my email from last Tuesday. Following up again.,frustration,P3,11
+I am tired of repeating my problem to every new agent.,frustration,P3,11
+Replacement request was approved but nothing has moved in ten days.,frustration,P2,11
+Power has been out in our entire lane since morning and it is 42 degrees.,frustration,P1,15
+No water supply for three days in the building. Children are suffering.,frustration,P1,12
+Server is down and our entire office cannot work. Please escalate immediately.,frustration,P1,12
+The courier marked it delivered but I never received the parcel.,frustration,P2,11
+"Mujhe abhi tak refund nahi mila, bohot pareshan hoon.",frustration,P2,9
+The AC installation is still pending since booking. No rush but please update.,frustration,P4,13
+Ticket was closed without solving anything and I had to reopen it.,frustration,P3,12
+I expected much better from a brand like yours. Very disappointed.,disappointment,P3,11
+The quality of the fabric is poor compared to what was shown online.,disappointment,P4,13
+Been a customer for eight years and this is how I am treated.,disappointment,P3,13
+Honestly let down by the service this time. It used to be so good.,disappointment,P3,14
+The food arrived cold and tasteless. Not what I expected at all.,disappointment,P3,12
+Not happy with the resolution offered. It does not cover my loss.,disappointment,P3,12
+Sad to see the standards drop so much in just one year.,disappointment,P4,12
+The room did not match the photos at all. Quite disappointing.,disappointment,P3,11
+I regret upgrading to the premium plan. There is no real difference.,disappointment,P4,12
+Expected faster delivery given the price I paid for it.,disappointment,P3,10
+The battery backup is nowhere near what was advertised.,disappointment,P3,9
+Service was fine but the follow up was really poor.,disappointment,P4,10
+Disappointed that the offer was withdrawn after I had already paid.,disappointment,P3,11
+The finish on the product looks cheap for this price point.,disappointment,P4,11
+Your new app update has made everything harder to use.,disappointment,P4,10
+There is a gas leak in my kitchen. Please send someone urgently.,anxiety,P1,12
+I can smell burning from the wiring near the meter and I am scared.,anxiety,P1,14
+My account shows an unauthorized transaction of 45000 rupees. Please block it.,anxiety,P1,12
+The lift is stuck between floors with my daughter inside.,anxiety,P1,10
+I am worried because my medicine order has not arrived and I am out of stock.,anxiety,P1,16
+Water is leaking from the ceiling and the wires are right below it.,anxiety,P1,13
+My flight is in six hours and the booking still shows pending.,anxiety,P1,12
+Someone has my OTP and I think my account is compromised.,anxiety,P1,11
+Wrong medicine was delivered to my father. Please correct this today.,anxiety,P1,11
+The washing machine is sparking when switched on.,anxiety,P1,8
+Payment of 120000 was debited but the order was not placed. I need urgent reversal.,anxiety,P1,15
+"I am stranded at the airport, my cab booking was cancelled twice.",anxiety,P1,12
+The cylinder delivered has a damaged seal. Is this safe to use?,anxiety,P2,12
+I am concerned about the delay since my exam form deadline is tomorrow.,anxiety,P2,13
+My elderly father is alone at home and the alarm is not working.,anxiety,P2,13
+There is a strange noise from the geyser and I am afraid to use it.,anxiety,P2,15
+I have not received the policy document and my coverage starts next week.,anxiety,P3,13
+My EMI is due tomorrow and the refund has still not come.,anxiety,P2,12
+Thank you for sorting this out so quickly. I really appreciate it.,satisfaction,P4,12
+The engineer was polite and fixed the issue in ten minutes.,satisfaction,P4,11
+Great service. The refund came through on the same day.,satisfaction,P4,10
+Very happy with the replacement. It works perfectly now.,satisfaction,P4,9
+Appreciate the quick callback. The issue is resolved.,satisfaction,P4,8
+Excellent support from your team today. Please pass on my thanks.,satisfaction,P4,11
+The delivery was early and the packaging was excellent.,satisfaction,P4,9
+Smooth experience overall. I would recommend this to friends.,satisfaction,P4,9
+"Thanks for the upgrade, the connection is stable now.",satisfaction,P4,9
+Your agent was extremely helpful and patient with all my questions.,satisfaction,P4,11
+Issue resolved. Thanks for the follow up call.,satisfaction,P4,8
+Good job on the quick installation. Very satisfied with the work.,satisfaction,P4,11
+"Thank you for the prompt replacement, everything is working now.",satisfaction,P4,10
+Happy with how fast the complaint was closed this time.,satisfaction,P4,10
+The new plan is good value and the switch was painless.,satisfaction,P4,11
+Please share the invoice for order 88231 for my records.,neutral,P4,10
+I want to update my registered mobile number.,neutral,P4,8
+What is the process for returning an item bought last month?,neutral,P4,11
+Kindly confirm whether my plan includes international roaming.,neutral,P4,8
+Requesting a duplicate receipt for the payment made on 12 August.,neutral,P4,11
+Please change my delivery address to the office location.,neutral,P3,9
+I would like to know the warranty period for this model.,neutral,P4,11
+Can you confirm if the service centre is open on Sunday?,neutral,P4,11
+There is a small mismatch in the GST number on the invoice.,neutral,P3,12
+Please cancel my order 55120 as I ordered it by mistake.,neutral,P3,11
+I need a copy of my statement for the last six months.,neutral,P4,12
+Is there any charge for changing the appointment date?,neutral,P4,9
+Billing amount seems higher than usual this month. Please check.,neutral,P3,10
+The app shows a different price than the website. Minor issue but confusing.,neutral,P4,13
+Could you please explain the late payment charge on my bill?,neutral,P3,11
+Please arrange a callback at your convenience regarding my plan.,neutral,P4,10
+Absolutely disgraceful. I have been a customer for six years and you treat me like this.,anger,P2,16
+Your technician broke my door frame and now you are refusing to pay for it.,anger,P2,15
+I am livid. You cancelled my booking an hour before the event without telling me.,anger,P1,15
+Stop sending me these threatening messages. This is pure harassment.,anger,P1,10
+You have lied to me three times now. I do not believe a word your team says.,anger,P2,17
+What kind of company charges a cancellation fee for a service you never delivered?,anger,P2,14
+Your call centre agent laughed at me. That is beyond unprofessional.,anger,P2,11
+I was promised a full refund in writing and now you are denying it ever happened.,anger,P2,16
+"This is theft, plain and simple. Return my money.",anger,P1,9
+Appalling. The hotel room had bedbugs and the manager accused me of bringing them.,anger,P2,14
+Your driver abused my wife when she asked him to wait two minutes.,anger,P1,13
+I am done with your excuses. Either fix this today or cancel my account.,anger,P2,14
+Charging me interest on an amount you wrongly debited is outrageous.,anger,P2,11
+The repair shop returned my laptop with a cracked screen and denied any damage.,anger,P2,14
+Your website took my payment and then showed an error. Where is my money?,anger,P1,14
+Pathetic. Four engineers have visited and not one of them knew what to do.,anger,P2,14
+You raised my premium by forty percent without a single word of notice.,anger,P2,13
+I have never been spoken to so rudely by any company in my life.,anger,P3,14
+Deleting my complaint from your portal does not make the problem disappear.,anger,P2,12
+"Aapki service bilkul bekar hai, paise lekar kaam nahi karte.",anger,P2,10
+Your staff forged my signature on the delivery receipt. I want an explanation.,anger,P1,13
+I am sick of being treated like a number. Someone take responsibility.,anger,P2,12
+You sold me an expired product and are now blaming the courier.,anger,P2,12
+Blocking my number so I cannot complain is cowardly and illegal.,anger,P1,11
+How is it acceptable to cut power to a paying customer by mistake twice in one week?,anger,P1,17
+The warranty you sold me is worthless. Every claim gets rejected on a technicality.,anger,P2,14
+Your agent hung up on my elderly father. Shameful behaviour.,anger,P2,10
+"I want compensation, not another scripted apology.",anger,P3,7
+Stop calling me at eleven at night to sell me things I have declined six times.,anger,P3,16
+You have ruined my daughter's birthday and your only response is a coupon.,anger,P2,13
+I have raised this ticket four times and it keeps getting closed without a fix.,frustration,P2,15
+Nobody in your company seems able to give me a straight answer.,frustration,P3,12
+Every agent asks me to explain the whole thing again from the beginning.,frustration,P3,13
+Still no engineer visit after seven days despite three confirmed appointments.,frustration,P2,11
+I uploaded my documents on Monday and the status still says awaiting documents.,frustration,P3,13
+Your chatbot keeps looping me back to the same unhelpful article.,frustration,P3,11
+Two weeks of calls and I am exactly where I started.,frustration,P2,11
+The reference number you gave me does not exist in your own system.,frustration,P3,13
+I keep getting automated replies that have nothing to do with my question.,frustration,P3,13
+Why do I have to chase you for an update that was promised to me?,frustration,P3,15
+The app logs me out every single time I try to complete the payment.,frustration,P2,14
+Transferred four times and then the call dropped. Starting over again.,frustration,P2,11
+I was told 48 hours. It has now been eleven days.,frustration,P2,11
+My address change request has failed three times for no stated reason.,frustration,P3,12
+You closed my complaint as resolved. It is not resolved.,frustration,P2,10
+Same error code as last month. Clearly nothing was actually fixed.,frustration,P2,11
+The helpline number on your website has been out of service for weeks.,frustration,P2,13
+I have emailed four different addresses and heard back from none of them.,frustration,P3,13
+"Har baar naya agent, har baar wahi kahani dohrani padti hai.",frustration,P3,11
+Your portal will not accept my own registered mobile number.,frustration,P3,10
+Third replacement unit and the same fault appears within a day.,frustration,P2,11
+I have been on hold for fifty minutes listening to the same jingle.,frustration,P3,13
+Nothing has moved since the escalation you promised would speed things up.,frustration,P2,12
+Why is a simple name correction taking over a month?,frustration,P3,10
+The tracking link has shown the same location since Tuesday.,frustration,P3,10
+I was asked to resend the same form for the fourth time today.,frustration,P3,13
+Your team keeps blaming another department instead of solving anything.,frustration,P3,10
+Every promised callback has failed to happen. Six of them now.,frustration,P2,11
+The refund was approved in August and it is now October.,frustration,P2,11
+I give up explaining. Please just read the ticket history before replying.,frustration,P3,12
+"I had heard good things about your service, which makes this harder to accept.",disappointment,P3,14
+The sofa looks nothing like the showroom piece we chose.,disappointment,P3,10
+For the price I paid I expected far better build quality.,disappointment,P3,11
+We saved for months for this trip and the room was not what was shown.,disappointment,P3,15
+The course content is much thinner than the brochure suggested.,disappointment,P4,10
+I used to recommend you to everyone. Not any more.,disappointment,P3,10
+The repair was done but the finish is sloppy and visible.,disappointment,P3,11
+Your premium tier offers nothing meaningfully different from the free one.,disappointment,P4,11
+The cake arrived intact but tasted stale and nothing like the sample.,disappointment,P3,12
+Twenty years with this bank and the service has quietly fallen apart.,disappointment,P3,12
+The photos online were clearly taken years ago. The place has not aged well.,disappointment,P4,14
+"I expected a human to call, not a form letter.",disappointment,P3,10
+"The fabric faded after a single wash, which is not what was advertised.",disappointment,P3,13
+Honestly a letdown. The old model was far more reliable.,disappointment,P3,10
+The compensation offered does not come close to what this cost me.,disappointment,P3,12
+I am sad to be writing this after such a good experience last year.,disappointment,P4,14
+The new interface has made simple tasks much harder to do.,disappointment,P4,11
+The portions were half of what we were served on our last visit.,disappointment,P4,13
+I trusted the five star reviews and regret booking this.,disappointment,P3,10
+"The battery lasts four hours, not the twelve you advertise.",disappointment,P3,10
+My son was looking forward to this all month and it was a washout.,disappointment,P3,14
+The service was adequate but nothing about it felt worth the premium.,disappointment,P4,12
+"I was hoping for a replacement, not a partial store credit.",disappointment,P3,11
+The paint job has started peeling within three weeks.,disappointment,P3,9
+"Your response, while polite, did not address my actual question.",disappointment,P3,10
+The flight was fine but losing our luggage on the way back soured the whole trip.,disappointment,P2,16
+I had expected a brand of this standing to handle this better.,disappointment,P3,12
+The instructor cancelled half the sessions we paid for.,disappointment,P2,9
+What arrived is clearly a lower specification than what was listed.,disappointment,P3,11
+"It is a shame, because the product itself is good when it works.",disappointment,P4,13
+I can hear gas escaping near the regulator and the room smells strongly.,anxiety,P1,13
+My card has been used in another city and I have no idea how.,anxiety,P1,14
+The wiring in the bathroom sparked when I touched the switch.,anxiety,P1,11
+My mother's oxygen concentrator has stopped and the backup is nearly empty.,anxiety,P1,12
+Someone has changed the email on my account and I am locked out.,anxiety,P1,13
+The visa appointment is tomorrow and my documents are still with you.,anxiety,P1,12
+There is water pooling around the electrical board in the basement.,anxiety,P1,11
+My salary was credited and vanished within minutes. I cannot reach anyone.,anxiety,P1,12
+The delivered medicine has a different strength than my prescription.,anxiety,P1,10
+My son has not received his insulin order and he has one dose left.,anxiety,P1,14
+The balcony railing on the twelfth floor is loose and my kids play there.,anxiety,P1,14
+I received an SMS about a loan I never applied for in my name.,anxiety,P1,14
+The car's brakes failed twice on the way home after your service.,anxiety,P1,12
+Our connection is down and I have a surgery consultation online in an hour.,anxiety,P1,14
+The smoke alarm has been beeping and smells hot to the touch.,anxiety,P1,12
+My examination fee deadline is at midnight and the payment keeps failing.,anxiety,P1,12
+I am worried the policy lapsed because the auto debit did not go through.,anxiety,P2,14
+The lock on the main gate is broken and the society has no guard tonight.,anxiety,P2,15
+I am nervous about signing this before someone explains the exclusions.,anxiety,P3,11
+My father is travelling alone tomorrow and his seat assignment has disappeared.,anxiety,P2,12
+The water has had a strange smell for two days and my kids have been unwell.,anxiety,P1,16
+I am concerned that my documents with my Aadhaar details were sent to a stranger.,anxiety,P1,15
+The scaffolding outside my window is swaying badly in this wind.,anxiety,P1,11
+My account shows a pending transaction I did not make and it is large.,anxiety,P1,14
+I have a court submission on Friday and the certified copy has not arrived.,anxiety,P2,14
+The heater is making a loud clicking sound and I am afraid to leave it on.,anxiety,P2,16
+I am anxious about the surgery date because the approval is still pending.,anxiety,P2,13
+My elderly neighbour's emergency alarm has not worked since your upgrade.,anxiety,P1,11
+The lift doors are opening between floors. Someone is going to get hurt.,anxiety,P1,13
+I think my account has been compromised. There are logins from three countries.,anxiety,P1,13
+"Your engineer arrived early, explained everything and left the place spotless.",satisfaction,P4,11
+The refund was processed within an hour of my call. Genuinely impressed.,satisfaction,P4,12
+"Thank you for the follow up, it is rare and very much appreciated.",satisfaction,P4,13
+Excellent handling of a difficult situation. Please thank the team for me.,satisfaction,P4,12
+The replacement arrived next day and works perfectly. Great service.,satisfaction,P4,10
+"I want to compliment the agent who helped me, she was outstanding.",satisfaction,P4,12
+"Smooth installation, polite staff and no mess. Nothing to complain about.",satisfaction,P4,11
+You turned a bad experience around completely. Thank you.,satisfaction,P4,9
+The upgrade was painless and the speed difference is immediately noticeable.,satisfaction,P4,11
+Appreciate how quickly you flagged the suspicious transaction. Well handled.,satisfaction,P4,10
+The packaging was thoughtful and everything arrived in perfect condition.,satisfaction,P4,10
+"Best customer service I have had this year, and I am not easy to please.",satisfaction,P4,15
+Thanks for staying on the line until it actually worked.,satisfaction,P4,10
+The new app update fixed exactly what I had complained about. Nice work.,satisfaction,P4,13
+"Really grateful for the early delivery, it saved our weekend.",satisfaction,P4,10
+Your team went well beyond what I expected. Please pass this on to them.,satisfaction,P4,14
+"Quick, clear and no runaround. Exactly how it should be.",satisfaction,P4,10
+The technician found the real fault that two others had missed.,satisfaction,P4,11
+Happy to report the issue has not come back since the last visit.,satisfaction,P4,13
+"Bahut achhi service mili, dhanyavaad.",satisfaction,P4,5
+The claim was settled without a single unnecessary question. Refreshing.,satisfaction,P4,10
+Thank you for honouring the warranty without an argument.,satisfaction,P4,9
+The driver waited patiently and helped my mother with her bags.,satisfaction,P4,11
+I was dreading this call and it took four minutes. Thank you.,satisfaction,P4,12
+Very satisfied with how the complaint was handled start to finish.,satisfaction,P4,11
+The room was upgraded without me even asking. Lovely touch.,satisfaction,P4,10
+"Good communication throughout, I always knew what was happening.",satisfaction,P4,9
+The repair held up through the monsoon. Solid work.,satisfaction,P4,9
+"Thanks for the clear explanation of the charges, that cleared it up.",satisfaction,P4,12
+Please keep this agent. She is the reason I am staying with you.,satisfaction,P4,13
+Please confirm the documents required to transfer this account to my spouse.,neutral,P3,12
+What are your working hours during the festival week?,neutral,P4,9
+I would like to add a second user to my existing plan.,neutral,P4,12
+Kindly send the breakdown of charges for the last billing cycle.,neutral,P3,11
+Is there a service centre in Jaipur that handles this model?,neutral,P4,11
+Please update my communication preference to email only.,neutral,P4,8
+What is the notice period if I want to close the account?,neutral,P4,12
+Requesting a change of appointment from Thursday to Saturday.,neutral,P3,9
+Could you confirm whether this plan covers outstation travel?,neutral,P4,9
+I need the tax certificate for the financial year for filing.,neutral,P3,11
+Please let me know the current status of application number 77213.,neutral,P3,11
+Do you offer an annual payment option instead of monthly?,neutral,P4,10
+I want to register a new address for delivery going forward.,neutral,P3,11
+What documents do I need to carry for the pickup?,neutral,P4,10
+Please share the warranty terms for the replaced part.,neutral,P4,9
+Is the installation charge included in the quoted price?,neutral,P4,9
+I would like to pause my subscription for two months.,neutral,P3,10
+Kindly confirm receipt of the signed agreement sent yesterday.,neutral,P3,9
+What is the process to nominate a beneficiary on this policy?,neutral,P4,11
+Please send a copy of the delivery challan for order 41887.,neutral,P4,11
+Can the appointment be scheduled for the morning slot instead?,neutral,P4,10
+I need to update the GST details registered on my account.,neutral,P3,11
+Which branches are open on the second Saturday of the month?,neutral,P4,11
+Please advise the lead time for a bulk order of forty units.,neutral,P3,12
+I am relocating next month and need to transfer the connection.,neutral,P3,11
+Could you confirm the serial number recorded against my warranty?,neutral,P4,10
+What is the limit for contactless payments on this card?,neutral,P4,10
+Please remove the add-on service from my next billing cycle.,neutral,P3,10
+I would like to know if an extended warranty is available.,neutral,P4,11
+Kindly confirm the courier partner used for this shipment.,neutral,P4,9
